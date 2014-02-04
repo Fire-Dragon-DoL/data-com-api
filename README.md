@@ -1,12 +1,13 @@
-# DataComApi
+# Data.com API
 
-TODO: Write a gem description
+Allows to interface with Data.com API ( Salesforce, ex Jigsaw ).  
+**Work in progress**
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'data_com_api'
+    gem 'data-com-api'
 
 And then execute:
 
@@ -14,7 +15,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install data_com_api
+    $ gem install data-com-api
 
 ## Usage
 
