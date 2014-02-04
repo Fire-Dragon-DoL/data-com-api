@@ -1,4 +1,4 @@
-# Data.com API
+# DataComApi
 
 Allows to interface with Data.com API ( Salesforce, ex Jigsaw ).  
 **Work in progress**
