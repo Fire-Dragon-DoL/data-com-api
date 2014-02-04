@@ -3,4 +3,6 @@ require 'data-com-api/client'
 
 describe DataComApi::Client do
 
+  
+
 end
