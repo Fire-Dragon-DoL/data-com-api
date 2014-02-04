@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = DataComApi::VERSION
   spec.authors       = ["Fire-Dragon-DoL"]
   spec.email         = ["francesco.belladonna@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Allows to interface with Data.com API ( Salesforce ex Jigsaw )}
+  spec.summary       = %q{Allows to interface with Data.com API ( Salesforce ex Jigsaw )}
   spec.homepage      = ""
   spec.license       = "MIT"
 
