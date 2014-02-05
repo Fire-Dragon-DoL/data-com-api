@@ -2,6 +2,15 @@ require 'hashie'
 require 'active_support/core_ext/object/to_query'
 
 class QueryParameters < Hashie::Trash
+  UNALLOWED_FIELDS = [
+    :offset,
+    :pageSize,
+    :page_size,
+    :username,
+    :password,
+    :token
+  ].freeze
+
   property :companyId,        from: :company_id
   property :updatedSince,     from: :updated_since
   property :title
@@ -28,7 +37,7 @@ class QueryParameters < Hashie::Trash
   property :order
   property :orderBy,          from: :order_by
 
-  # Special params, used to inject into query
+  # Special params, used to inject into query, set only through gem
   property :offset
   property :pageSize, from: :page_size
   property :username
