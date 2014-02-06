@@ -37,10 +37,6 @@ module DataComApi
       @page_size = real_value
     end
 
-    def search_contact(options={})
-      Responses::SearchContact.new(search_contact_raw(options))
-    end
-
     # Raw calls
 
     def company_contact_count_raw(company_id, include_graveyard)
@@ -144,7 +140,57 @@ module DataComApi
       response.body
     end
 
+    # JSON calls
+
+    def company_contact_count(company_id, include_graveyard)
+      json_or_raise company_contact_count_raw(company_id, include_graveyard)
+    end
+
+    def search_contact(options={})
+      json_or_raise search_contact_raw(options)
+    end
+
+    def search_company(options={})
+      json_or_raise search_company_raw(options)
+    end
+
+    def contacts(contact_ids, username, password, purchase_flag=false)
+      json_or_raise contacts_raw(
+        contact_ids,
+        username,
+        password,
+        purchase_flag
+      )
+    end
+
+    def partner_contacts(contact_ids, end_org_id, end_user_id)
+      json_or_raise partner_contacts_raw(
+        contact_ids,
+        end_org_id,
+        end_user_id
+      )
+    end
+
+    def partner
+      json_or_raise partner_raw
+    end
+
+    def user(username, password)
+      json_or_raise user_raw(username, password)
+    end
+
     private
+
+      def json_or_raise(json_str)
+        json = JSON.parse(json_str)
+
+        if json.kind_of? Array
+          error = json.first
+          raise Error.from_code(error['errorCode']).new(error['errorMsg'])
+        end
+
+        json
+      end
 
       def token
         @token

@@ -25,7 +25,7 @@ module DataComApi
       super(msg)
     end
 
-    def self.error_from_code(error_code_str)
+    def self.from_code(error_code_str)
       case error_code_str
       when ParamError::API_ERROR_CODE             then ParamError
       when LoginFailError::API_ERROR_CODE         then LoginFailError
