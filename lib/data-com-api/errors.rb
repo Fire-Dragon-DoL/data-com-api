@@ -4,6 +4,9 @@ module DataComApi
 
   class Error < StandardError
 
+    API_HTTP_STATUS_CODE = 0
+    API_ERROR_CODE       = 'no error code provided'
+
     attr_reader :http_status_code
     attr_reader :api_stack_trace
     attr_reader :error_code
@@ -20,6 +23,22 @@ module DataComApi
       @error_code       ||= options[:error_code] || self.class::API_ERROR_CODE
 
       super(msg)
+    end
+
+    def self.error_from_code(error_code_str)
+      case error_code_str
+      when ParamError::API_ERROR_CODE             then ParamError
+      when LoginFailError::API_ERROR_CODE         then LoginFailError
+      when TokenFailError::API_ERROR_CODE         then TokenFailError
+      when PurchaseLowPointsError::API_ERROR_CODE then PurchaseLowPointsError
+      when ContactNotExistError::API_ERROR_CODE   then ContactNotExistError
+      when ContactNotOwnedError::API_ERROR_CODE   then ContactNotOwnedError
+      when SearchError::API_ERROR_CODE            then SearchError
+      when SysError::API_ERROR_CODE               then SysError
+      when NotImplementedError::API_ERROR_CODE    then NotImplementedError
+      when NotAvailableError::API_ERROR_CODE      then NotAvailableError
+      else Error
+      end
     end
 
   end

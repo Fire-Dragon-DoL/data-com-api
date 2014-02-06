@@ -1,4 +1,5 @@
 require 'data-com-api/errors'
+require 'data-com-api/responses/search_contact.rb'
 
 module DataComApi
 
@@ -7,9 +8,13 @@ module DataComApi
     ENV_NAME_TOKEN = 'DATA_COM_TOKEN'.freeze
     TIME_ZONE      = 'Pacific Time (US & Canada)'.freeze
 
+    attr_reader :api_calls_count
+    attr_reader :token
+
     def initialize(api_token=nil)
-      @token     = api_token || ENV[ENV_NAME_TOKEN]
-      @page_size = 50
+      @token           = api_token || ENV[ENV_NAME_TOKEN]
+      @page_size       = 50
+      @api_calls_count = 0
 
       raise TokenFailError, 'No token set!' unless @token
     end
@@ -29,10 +34,14 @@ module DataComApi
       @page_size = real_value
     end
 
+    def search_contact(options={})
+      Responses::SearchContact.new
+    end
+
     private
 
-      def token
-        @token
+      def increase_api_calls_count!
+        @api_calls_count += 1
       end
 
   end
