@@ -40,6 +40,9 @@ module DataComApi
     property :includeGraveyard, from: :include_graveyard
     property :order
     property :orderBy,          from: :order_by
+    property :purchaseFlag,     from: :purchase_flag
+    property :endOrgId,         from: :end_org_id
+    property :endUserId,        from: :end_user_id
 
     # Special params, used to inject into query, set only through gem
     property :offset

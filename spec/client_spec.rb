@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'data-com-api/results/search_contact'
+require 'data-com-api/responses/search_contact'
 require 'data-com-api/client'
 
 describe DataComApi::Client do
@@ -21,7 +21,7 @@ describe DataComApi::Client do
     end
 
     it ".new raises error when both no token passed and no env DATA_COM_TOKEN set" do
-      expect{described_class.new}.to raise_error
+      expect{described_class.new}.to raise_error DataComApi::TokenFailError
     end
 
   end
@@ -38,7 +38,7 @@ describe DataComApi::Client do
     expect{client.page_size = (-1)}.to raise_error DataComApi::ParamError
   end
 
-  it "#search_contact returns instance of SearchContactResult" do
+  it "#search_contact returns instance of SearchContact" do
     expect(client.search_contact).to be_an_instance_of DataComApi::Responses::SearchContact
   end
 
@@ -46,6 +46,16 @@ describe DataComApi::Client do
 
     it "#size > 0" do
       expect(client.search_contact.size).to be > 0
+    end
+
+    it "with first_name Dummy and returns records" do
+      expect(
+        client.search_contact(first_name: 'Dummy').all.first.first_name
+      ).to be eq('Dummy')
+    end
+
+    it "with first_name DoesntExist and returns no records" do
+      expect(client.search_contact(first_name: 'DoesntExist').all.first).to be_nil
     end
 
     # it "#each runs client.page_size times" do
@@ -56,16 +66,6 @@ describe DataComApi::Client do
     #   end
     # end
 
-  end
-
-  it "#search_contact with first_name Dummy and returns records" do
-    expect(
-      client.search_contact(first_name: 'Dummy').all.first.first_name
-    ).to be eq('Dummy')
-  end
-
-  it "#search_contact with first_name DoesntExist and returns no records" do
-    expect(client.search_contact(first_name: 'DoesntExist').all.first).to be_nil
   end
 
 

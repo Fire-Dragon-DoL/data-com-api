@@ -1,4 +1,4 @@
-require 'data-com-api/requests/base'
+require 'data-com-api/responses/base'
 
 module DataComApi
   module Responses

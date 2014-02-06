@@ -1,11 +1,8 @@
-require 'httparty'
-require 'json'
-
 module DataComApi
   module Responses
     class Base
-      include HTTParty
-      base_uri 'https://www.jigsaw.com'
+
+      MAX_OFFSET = 100_000
       
       def initialize(api_client)
         @client = api_client
@@ -24,30 +21,6 @@ module DataComApi
         end
 
       private
-
-        def generate_params(options)
-          # params = QueryParameters.new(
-          #   options
-          # )
-          # .except(
-          #     QueryParameters::UNALLOWED_FIELDS
-          #   )
-
-          # params.offset    = 0
-          # params.page_size = client.page_size
-          # params.token     = client.token
-
-          # params
-
-          params       = QueryParameters.new(options)
-          params.token = client.token
-
-          params
-        end
-
-        def increase_api_calls_count!
-          @client.send(:increase_api_calls_count!)
-        end
 
         def client
           @client
