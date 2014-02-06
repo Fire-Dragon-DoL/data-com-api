@@ -1,5 +1,4 @@
 require 'hashie'
-require 'active_support/core_ext/object/to_query'
 require 'active_support/time'
 
 module DataComApi
@@ -46,7 +45,7 @@ module DataComApi
 
     # Special params, used to inject into query, set only through gem
     property :offset
-    property :pageSize, from: :page_size
+    property :pageSize,         from: :page_size
     property :username
     property :password
     property :token

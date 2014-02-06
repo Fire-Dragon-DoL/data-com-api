@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec-expectations', '~> 2.14'
   spec.add_development_dependency 'factory_girl',       '~> 4.3'
   spec.add_development_dependency 'faker',              '~> 1.2'
+  spec.add_development_dependency 'insensitive_hash',   '~> 0.3'
   spec.add_development_dependency 'webmock',            '~> 1.17'
   spec.add_development_dependency 'bundler',            '~> 1.3'
   spec.add_development_dependency 'pry'

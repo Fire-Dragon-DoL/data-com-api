@@ -1,6 +1,8 @@
 require 'pry'
+require 'webmock/rspec'
 require 'factory_girl'
-require 'factories'
+
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   # Fix for faker deprecation message

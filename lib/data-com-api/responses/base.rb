@@ -10,18 +10,6 @@ module DataComApi
 
       protected
 
-        def get_search_contact(options={})
-          response = self.class.get(
-            "/rest/searchContact.json",
-            generate_params(options)
-          )
-          increase_api_calls_count!
-
-          response.body
-        end
-
-      private
-
         def client
           @client
         end

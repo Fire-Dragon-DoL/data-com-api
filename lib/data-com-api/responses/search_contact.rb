@@ -4,6 +4,11 @@ module DataComApi
   module Responses
     class SearchContact < Base
 
+      def initialize(api_client, options={})
+        @options = options
+        super(api_client)
+      end
+
       def size
         50
       end
@@ -21,6 +26,12 @@ module DataComApi
           index += 1
         end
       end
+
+      private
+
+        def options
+          @options
+        end
       
     end
   end

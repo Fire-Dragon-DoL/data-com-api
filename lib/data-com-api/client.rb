@@ -11,8 +11,10 @@ module DataComApi
 
     ENV_NAME_TOKEN = 'DATA_COM_TOKEN'.freeze
     TIME_ZONE      = 'Pacific Time (US & Canada)'.freeze
+    BASE_OFFSET    = 0
 
     attr_reader :api_calls_count
+    attr_reader :token
 
     def initialize(api_token=nil)
       @token           = api_token || ENV[ENV_NAME_TOKEN]
@@ -35,6 +37,10 @@ module DataComApi
       end
 
       @page_size = real_value
+    end
+
+    def search_contact(options={})
+      Responses::SearchContact.new(self, options)
     end
 
     # Raw calls
@@ -142,19 +148,19 @@ module DataComApi
 
     # JSON calls
 
-    def company_contact_count(company_id, include_graveyard)
+    def company_contact_count_raw_json(company_id, include_graveyard)
       json_or_raise company_contact_count_raw(company_id, include_graveyard)
     end
 
-    def search_contact(options={})
+    def search_contact_raw_json(options={})
       json_or_raise search_contact_raw(options)
     end
 
-    def search_company(options={})
+    def search_company_raw_json(options={})
       json_or_raise search_company_raw(options)
     end
 
-    def contacts(contact_ids, username, password, purchase_flag=false)
+    def contacts_raw_json(contact_ids, username, password, purchase_flag=false)
       json_or_raise contacts_raw(
         contact_ids,
         username,
@@ -163,7 +169,7 @@ module DataComApi
       )
     end
 
-    def partner_contacts(contact_ids, end_org_id, end_user_id)
+    def partner_contacts_raw_json(contact_ids, end_org_id, end_user_id)
       json_or_raise partner_contacts_raw(
         contact_ids,
         end_org_id,
@@ -171,11 +177,11 @@ module DataComApi
       )
     end
 
-    def partner
+    def partner_raw_json
       json_or_raise partner_raw
     end
 
-    def user(username, password)
+    def user_raw_json(username, password)
       json_or_raise user_raw(username, password)
     end
 
@@ -192,15 +198,11 @@ module DataComApi
         json
       end
 
-      def token
-        @token
-      end
-
       def generate_params(options)
         params           = QueryParameters.new(options)
-        params.offset    = 0                unless params.offset
-        params.page_size = client.page_size unless params.page_size
-        params.token     = client.token
+        params.offset    = BASE_OFFSET unless params.offset
+        params.page_size = page_size   unless params.pageSize
+        params.token     = token
 
         params
       end
