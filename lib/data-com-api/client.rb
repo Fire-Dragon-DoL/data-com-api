@@ -198,7 +198,7 @@ module DataComApi
 
       def generate_params(options)
         params           = QueryParameters.new(options)
-        params.offset    = 0 unless params.offset
+        params.offset    = 0                unless params.offset
         params.page_size = client.page_size unless params.page_size
         params.token     = client.token
 
