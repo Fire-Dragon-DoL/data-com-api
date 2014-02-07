@@ -1,10 +1,11 @@
+require 'hashie'
 require 'faker'
 require 'active_support/hash_with_indifferent_access'
 require 'data-com-api/client'
 
 FactoryGirl.define do
 
-  factory :data_com_search_contact_response, class: HashWithIndifferentAccess do
+  factory :data_com_search_contact_response, class: Hashie::Mash do
     ignore do
       page_size 3
     end

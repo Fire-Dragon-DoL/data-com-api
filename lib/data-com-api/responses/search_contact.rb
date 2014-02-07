@@ -10,7 +10,10 @@ module DataComApi
       end
 
       def size
-        50
+        size_options = options.merge(offset: 0, page_size: 0)
+        res = client.search_contact_raw_json(size_options)
+        
+        res['totalHits']
       end
 
       def each

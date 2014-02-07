@@ -7,10 +7,11 @@ describe DataComApi::Client do
   subject(:client) { FactoryGirl.build(:client) }
 
   describe "#search_contact" do
-
-    xit "#size > 0" do
-      expect(client.search_contact.size).to be > 0
+    before do
+      DataComApiStubRequests.stub_search_contact
     end
+
+    it { expect(client.search_contact.size).to be > 0 }
 
     xit "with first_name Dummy and returns records" do
       expect(

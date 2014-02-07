@@ -9,6 +9,10 @@ factories_path = Pathname.new(File.expand_path('..', __FILE__))
 factories_path = factories_path.join('factories', '**', '*.rb')
 Dir[factories_path].each { |f| require f }
 
+support_path = Pathname.new(File.expand_path('..', __FILE__))
+support_path = support_path.join('support', '**', '*.rb')
+Dir[support_path].each { |f| require f }
+
 RSpec.configure do |config|
   # Fix for faker deprecation message
   I18n.enforce_available_locales                         = true

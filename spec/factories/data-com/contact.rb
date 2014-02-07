@@ -1,3 +1,4 @@
+require 'hashie'
 require 'faker'
 require 'active_support/time'
 require 'active_support/hash_with_indifferent_access'
@@ -5,7 +6,7 @@ require 'data-com-api/client'
 
 FactoryGirl.define do
 
-  factory :data_com_contact, class: HashWithIndifferentAccess do
+  factory :data_com_contact, class: Hashie::Mash do
     zip             { Faker::Address.zip.to_s                                  }
     phone           { Faker::PhoneNumber.phone_number                          }
     areaCode        { Faker::Number.number(3)                                  }

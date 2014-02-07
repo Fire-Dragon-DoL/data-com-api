@@ -44,13 +44,7 @@ describe DataComApi::Client do
 
   describe "#search_contact" do
     before do
-      stub_request(:get, client.class.base_uri).with(
-        query: {
-          offset:   client.class::BASE_OFFSET,
-          pageSize: client.page_size,
-          token:    client.token
-        }
-      )
+      DataComApiStubRequests.stub_search_contact
     end
 
     it "returns instance of SearchContact" do
@@ -58,12 +52,10 @@ describe DataComApi::Client do
     end
 
     it "calls search_contact_raw_json on client" do
-      expect(client).to receive(:search_contact_raw_json).once
+      expect(client).to receive(:search_contact_raw_json).once.and_call_original
 
       client.search_contact.size
     end
-
-    it { expect(client.search_contact.size).to be > 0 }
 
   end
 

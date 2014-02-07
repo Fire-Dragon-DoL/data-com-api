@@ -1,6 +1,7 @@
 require 'httparty'
 require 'json'
 require 'data-com-api/errors'
+require 'data-com-api/api_uri'
 require 'data-com-api/responses/search_contact.rb'
 
 module DataComApi
@@ -59,7 +60,7 @@ module DataComApi
       )
 
       response = self.class.get(
-        "/rest/companyContactCount/#{ params.company_id }.json",
+        ApiURI.company_contact_count(company_id),
         params
       )
       increase_api_calls_count!
@@ -69,7 +70,7 @@ module DataComApi
 
     def search_contact_raw(options={})
       response = self.class.get(
-        "/rest/searchContact.json",
+        ApiURI.search_contact,
         generate_params(options)
       )
       increase_api_calls_count!
@@ -79,7 +80,7 @@ module DataComApi
 
     def search_company_raw(options={})
       response = self.class.get(
-        "/rest/searchCompany.json",
+        ApiURI.search_company,
         generate_params(options)
       )
       increase_api_calls_count!
@@ -98,7 +99,7 @@ module DataComApi
       )
       
       response = self.class.get(
-        "/rest/contacts/#{ contact_ids.join(',') }.json",
+        ApiURI.contacts(company_ids),
         params
       )
       increase_api_calls_count!
@@ -116,7 +117,7 @@ module DataComApi
       )
       
       response = self.class.get(
-        "/rest/partnerContacts/#{ contact_ids.join(',') }.json",
+        ApiURI.partner_contacts(contact_ids),
         params
       )
       increase_api_calls_count!
@@ -128,7 +129,7 @@ module DataComApi
       params = QueryParameters.new(token: token)
       
       response = self.class.get(
-        "/rest/partner.json",
+        ApiURI.partner,
         params
       )
       increase_api_calls_count!
@@ -144,7 +145,7 @@ module DataComApi
       )
       
       response = self.class.get(
-        "/rest/user.json",
+        ApiURI.user,
         params
       )
       increase_api_calls_count!
