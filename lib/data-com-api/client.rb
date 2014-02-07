@@ -12,13 +12,16 @@ module DataComApi
     ENV_NAME_TOKEN = 'DATA_COM_TOKEN'.freeze
     TIME_ZONE      = 'Pacific Time (US & Canada)'.freeze
     BASE_OFFSET    = 0
+    BASE_PAGE_SIZE = 50
+    MIN_PAGE_SIZE  = 0
+    MAX_PAGE_SIZE  = 100
 
     attr_reader :api_calls_count
     attr_reader :token
 
     def initialize(api_token=nil)
       @token           = api_token || ENV[ENV_NAME_TOKEN]
-      @page_size       = 50
+      @page_size       = BASE_PAGE_SIZE
       @api_calls_count = 0
 
       raise TokenFailError, 'No token set!' unless @token
@@ -32,8 +35,11 @@ module DataComApi
     def page_size=(value)
       real_value = value.to_i
 
-      if real_value < 0 || real_value > 100
-        raise ParamError, "page_size must be between 0 and 100, received #{ real_value }"
+      if real_value < MIN_PAGE_SIZE || real_value > MAX_PAGE_SIZE
+        raise ParamError, <<-eos
+          page_size must be between #{ MIN_PAGE_SIZE } and #{ MAX_PAGE_SIZE },
+          received #{ real_value }"
+        eos
       end
 
       @page_size = real_value

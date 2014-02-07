@@ -1,8 +1,13 @@
 require 'pry'
+require 'pathname'
 require 'webmock/rspec'
 require 'factory_girl'
 
 WebMock.disable_net_connect!(allow_localhost: true)
+
+factories_path = Pathname.new(File.expand_path('..', __FILE__))
+factories_path = factories_path.join('factories', '**', '*.rb')
+Dir[factories_path].each { |f| require f }
 
 RSpec.configure do |config|
   # Fix for faker deprecation message

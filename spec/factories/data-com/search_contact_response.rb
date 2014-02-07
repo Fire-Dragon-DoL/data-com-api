@@ -1,35 +1,32 @@
 require 'faker'
+require 'active_support/hash_with_indifferent_access'
+require 'data-com-api/client'
 
 FactoryGirl.define do
 
-  factory :data_com_search_contact_response, class: InsensitiveHash do
+  factory :data_com_search_contact_response, class: HashWithIndifferentAccess do
+    ignore do
+      page_size 3
+    end
+
     totalHits 0
     contacts []
-    #     {
-    #   "zip": "33316-1721",
-    #   "phone": "",
-    #   "areaCode": "1954",
-    #   "updatedDate": "2011-07-22 08:04:25 PDT",
-    #   "seoContactURL": "http://www.jigsaw.com/scid40361843/elena_tsukanova.xhtml",
-    #   "state": "FL",
-    #   "lastname": "Tsukanova",
-    #   "firstname": "Elena",
-    #   "companyName": "Moran Yacht & Ship, Inc.",
-    #   "contactURL": "http://www.jigsaw.com/BC.xhtml?contactId=40361843",
-    #   "contactSales": 0,
-    #   "country": "United States",
-    #   "owned": false,
-    #   "city": "Fort Lauderdale",
-    #   "title": "Ð¡harter and Yacht Management Assistant-Moscow",
-    #   "contactId": 40361843,
-    #   "email": "",
-    #   "address": "1300 SE 17th St Ste 204",
-    #   "graveyardStatus": false,
-    #   "ownedType": "",
-    #   "companyId": 601197
-    # }
 
     initialize_with { new(attributes) }
+
+    after(:build) do |data_com_search_contact_response, evaluator|
+      contacts_size = data_com_search_contact_response[:totalHits]
+      page_size     = evaluator.page_size
+
+      if contacts_size > 0 && page_size > 0
+        page_size = contacts_size if contacts_size < page_size
+
+        data_com_search_contact_response.contacts = FactoryGirl.build_list(
+          :data_com_contact,
+          page_size
+        ) if contacts_size > 0
+      end
+    end
   end
 
 end
