@@ -10,12 +10,14 @@ module DataComApi
     include HTTParty
     base_uri 'https://www.jigsaw.com'
 
-    ENV_NAME_TOKEN = 'DATA_COM_TOKEN'.freeze
-    TIME_ZONE      = 'Pacific Time (US & Canada)'.freeze
-    BASE_OFFSET    = 0
-    BASE_PAGE_SIZE = 50
-    MIN_PAGE_SIZE  = 0
-    MAX_PAGE_SIZE  = 100
+    ENV_NAME_TOKEN      = 'DATA_COM_TOKEN'.freeze
+    TIME_ZONE           = 'Pacific Time (US & Canada)'.freeze
+    BASE_OFFSET         = 0
+    BASE_PAGE_SIZE      = 50
+    SIZE_ONLY_PAGE_SIZE = 0
+    # We start at 1, 0 is a special case
+    MIN_PAGE_SIZE       = 1
+    MAX_PAGE_SIZE       = 100
 
     attr_reader :api_calls_count
     attr_reader :token

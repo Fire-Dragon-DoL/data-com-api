@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'data-com-api/responses/base'
 require 'data-com-api/responses/search_contact'
 require 'data-com-api/client'
 
@@ -28,7 +29,7 @@ describe DataComApi::Client do
 
   describe "#page_size=" do
 
-    it "accepts values between 0 and 100" do
+    it "accepts values between 1 and 100" do
       expect{client.page_size = Random.rand(101)}.not_to raise_error
     end
 
@@ -36,25 +37,44 @@ describe DataComApi::Client do
       expect{client.page_size = 101}.to raise_error DataComApi::ParamError
     end
 
-    it "doesn't accept values < 0" do
-      expect{client.page_size = (-1)}.to raise_error DataComApi::ParamError
+    it "doesn't accept values < 1" do
+      expect{client.page_size = 0}.to raise_error DataComApi::ParamError
     end
 
   end
 
   describe "#search_contact" do
-    before do
-      DataComApiStubRequests.stub_search_contact
-    end
 
     it "returns instance of SearchContact" do
+      DataComApiStubRequests.stub_search_contact 500
+
       expect(client.search_contact).to be_an_instance_of DataComApi::Responses::SearchContact
     end
 
     it "calls search_contact_raw_json on client" do
+      DataComApiStubRequests.stub_search_contact 500
       expect(client).to receive(:search_contact_raw_json).once.and_call_original
 
       client.search_contact.size
+    end
+
+    it "has a number of pages equal to size / page_size" do
+      DataComApiStubRequests.stub_search_contact 500
+
+      search_response = client.search_contact
+
+      expect(search_response.total_pages).to be(search_response.size / client.page_size)
+    end
+
+    it "has a number of pages not greater than #{ DataComApi::Responses::Base::MAX_OFFSET }" do
+      max_pages    = DataComApi::Responses::Base::MAX_OFFSET
+      # Arbitrary number bigger twice maximum amount of results that can be displayed
+      max_contacts = max_pages * (client.class::MAX_PAGE_SIZE * 2)
+      DataComApiStubRequests.stub_search_contact max_contacts
+
+      search_response = client.search_contact
+
+      expect(search_response.total_pages).to be max_pages
     end
 
   end

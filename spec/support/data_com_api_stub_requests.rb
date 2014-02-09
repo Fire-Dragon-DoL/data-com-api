@@ -9,7 +9,11 @@ class DataComApiStubRequestsBase
   include Singleton
   include WebMock::API
 
-  def stub_search_contact
+  def stub_all
+    stub_search_contact
+  end
+
+  def stub_search_contact(searched_contacts_size)
     stub_request(
       :get,
       URI.join(
@@ -20,12 +24,12 @@ class DataComApiStubRequestsBase
       'query' => hash_including(DataComApi::QueryParameters.new(
         page_size: 0,
         offset:   0
-      ))
+      ).to_hash)
     ).to_return(
       body: FactoryGirl.build(
         :data_com_search_contact_response,
         page_size: 0,
-        totalHits: 500
+        totalHits: searched_contacts_size
       ).to_json
     )
 
@@ -37,7 +41,7 @@ class DataComApiStubRequestsBase
     ).to_return(
       body: FactoryGirl.build(
         :data_com_search_contact_response,
-        totalHits: 500
+        totalHits: searched_contacts_size
       ).to_json
     )
   end
