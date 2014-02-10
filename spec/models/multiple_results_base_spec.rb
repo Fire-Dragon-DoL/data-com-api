@@ -13,7 +13,7 @@ describe DataComApi::Responses::MultipleResultsBase do
 
   # Params: options, which are params passed to the request which will be
   #         converted into query params for url
-  context "#perform_request" do
+  describe "#perform_request" do
 
     it { expect(multiple_results_response).to respond_to :perform_request }
     it { expect{multiple_results_response.send(:perform_request)}.to raise_error ArgumentError }
@@ -36,7 +36,7 @@ describe DataComApi::Responses::MultipleResultsBase do
   end
 
   # Params: request, which is the requested data in json format
-  context "#transform_request" do
+  describe "#transform_request" do
 
     it { expect(multiple_results_response).to respond_to :transform_request }
     it { expect{multiple_results_response.send(:transform_request)}.to raise_error ArgumentError }
@@ -60,6 +60,46 @@ describe DataComApi::Responses::MultipleResultsBase do
       multiple_results_response.page(1).each do |contact|
         expect(contact).to be_an_instance_of DataComApi::Contact
       end
+    end
+
+  end
+
+  describe "#total_pages", focus: true do
+  
+    it "returns 11 pages for 32 records" do
+      client.page_size = 3
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 32)
+      )
+
+      expect(client.search_contact.total_pages).to be 11
+    end
+  
+    it "returns 0 pages for 0 records" do
+      client.page_size = 3
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 0)
+      )
+
+      expect(client.search_contact.total_pages).to be 0
+    end
+  
+    it "returns 1 page for 2 records" do
+      client.page_size = 3
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 2)
+      )
+
+      expect(client.search_contact.total_pages).to be 1
+    end
+  
+    it "returns 10 pages for 30 records" do
+      client.page_size = 3
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 30)
+      )
+
+      expect(client.search_contact.total_pages).to be 10
     end
 
   end

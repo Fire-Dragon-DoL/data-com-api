@@ -7,8 +7,6 @@ module DataComApi
     class MultipleResultsBase < Base
 
       MAX_OFFSET = 100_000
-
-      alias_method :to_a, :all
       
       def initialize(api_client, received_options)
         @options   = received_options
@@ -41,11 +39,9 @@ module DataComApi
 
         real_total_pages = search_total_hits / page_size
 
-        res = 1
-        if real_total_pages > 0
-          res = real_total_pages
-        end
-        res = MAX_OFFSET if real_total_pages > MAX_OFFSET
+        res  = real_total_pages
+        res += 1          unless (search_total_hits % page_size) == 0
+        res  = MAX_OFFSET if real_total_pages > MAX_OFFSET
 
         res
       end
@@ -61,6 +57,8 @@ module DataComApi
         end
       end
 
+      # Be careful, this will load all records in memory, check total_records
+      # before doing such a thing
       def all
         cache.fetch(:all) do
           pages_count = self.total_pages
@@ -92,6 +90,8 @@ module DataComApi
           all_records
         end
       end
+
+      alias_method :to_a, :all
 
       def each
         # pages_count  = self.total_pages

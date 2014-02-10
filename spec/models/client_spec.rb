@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'data-com-api/contact'
 require 'data-com-api/responses/base'
 require 'data-com-api/responses/search_contact'
+require 'data-com-api/api_uri'
 require 'data-com-api/client'
 
 describe DataComApi::Client do
@@ -78,19 +79,44 @@ describe DataComApi::Client do
       expect(search_response.total_pages).to be max_pages
     end
 
-    it "#all returns an array containing only Contact records" do
-      DataComApiStubRequests.stub_search_contact 20
-
-      client.search_contact.all.each do |contact|
-        expect(contact).to be_an_instance_of DataComApi::Contact
+    describe "#all" do
+      before do
+        (total_contacts / client.page_size).times do |page|
+          stub_request(
+            :get,
+            URI.join(
+              DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+            ).to_s
+          ).with(
+            'query' => hash_including(DataComApi::QueryParameters.new(
+              page_size: client.page_size,
+              offset:   page * client.page_size
+            ).to_hash)
+          ).to_return(
+            body: FactoryGirl.build(
+              :data_com_search_contact_response,
+              page_size: client.page_size,
+              totalHits: total_contacts
+            ).to_json
+          )
+        end
       end
-    end
 
-    it "#all returns an array containing all records possible for request" do
-      total_contacts = 20
-      DataComApiStubRequests.stub_search_contact total_contacts
+      let!(:total_contacts) { 20 }
 
-      expect(client.search_contact.all.size).to be total_contacts
+      it "#all returns an array containing only Contact records" do
+
+        client.search_contact.all.each do |contact|
+          expect(contact).to be_an_instance_of DataComApi::Contact
+        end
+      end
+
+      it "#all returns an array containing all records possible for request" do
+        DataComApiStubRequests.stub_search_contact total_contacts
+
+        expect(client.search_contact.all.size).to be total_contacts
+      end
+
     end
 
   end
