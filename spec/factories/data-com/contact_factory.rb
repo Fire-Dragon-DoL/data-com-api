@@ -22,7 +22,7 @@ FactoryGirl.define do
     owned           false
     city            { Faker::Address.city                                      }
     title           { Faker::Lorem.sentence                                    }
-    contactid       { Faker::Number.number(6).to_i                             }
+    contactId       { Faker::Number.number(6).to_i                             }
     email           { Faker::Internet.email                                    }
     address         { Faker::Address.street_address                            }
     graveyardStatus false

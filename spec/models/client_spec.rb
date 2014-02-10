@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'data-com-api/contact'
 require 'data-com-api/responses/base'
 require 'data-com-api/responses/search_contact'
 require 'data-com-api/client'
@@ -75,6 +76,21 @@ describe DataComApi::Client do
       search_response = client.search_contact
 
       expect(search_response.total_pages).to be max_pages
+    end
+
+    it "#all returns an array containing only Contact records" do
+      DataComApiStubRequests.stub_search_contact 20
+
+      client.search_contact.all.each do |contact|
+        expect(contact).to be_an_instance_of DataComApi::Contact
+      end
+    end
+
+    it "#all returns an array containing all records possible for request" do
+      total_contacts = 20
+      DataComApiStubRequests.stub_search_contact total_contacts
+
+      expect(client.search_contact.all.size).to be total_contacts
     end
 
   end

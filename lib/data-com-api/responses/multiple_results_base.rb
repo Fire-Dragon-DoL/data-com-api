@@ -1,3 +1,4 @@
+require 'thread/future'
 require 'data-com-api/responses/base'
 
 module DataComApi
@@ -6,9 +7,12 @@ module DataComApi
     class MultipleResultsBase < Base
 
       MAX_OFFSET = 100_000
+
+      alias_method :to_a, :all
       
-      def initialize(api_client)
-        super
+      def initialize(api_client, received_options)
+        @options   = received_options
+        super(api_client)
         # Cache pagesize, MUST NOT change between requests
         @page_size = client.page_size
       end
@@ -53,14 +57,47 @@ module DataComApi
             offset: (index - 1) * page_size
           )
 
-          self.perform_request(page_options)
+          self.transform_request self.perform_request(page_options)
+        end
+      end
+
+      def all
+        cache.fetch(:all) do
+          pages_count = self.total_pages
+          all_records = Array.new(pages_count * self.page_size)
+          break all_records if pages_count == 0
+
+          current_page      = 1
+          next_page_data    = Thread.future { self.page(current_page) }
+          current_page_data = nil
+
+          
+          pages_count.times do
+            current_page_data = next_page_data
+            if current_page == pages_count
+              next_page_data = nil
+            else
+              next_page_data = Thread.future { self.page(current_page + 1) }
+            end
+
+            unless current_page_data
+              (~current_page_data).each do |record|
+                all_records << record
+              end
+            end
+
+            current_page += 1
+          end
+
+          all_records
         end
       end
 
       def each
-        self.size.times do
-          yield(self)
-        end
+        # pages_count  = self.total_pages
+        # current_page = 0
+        
+        # pages_count
       end
 
       def each_with_index
@@ -71,7 +108,7 @@ module DataComApi
         end
       end
 
-      private
+      protected
 
         def page_size
           @page_size

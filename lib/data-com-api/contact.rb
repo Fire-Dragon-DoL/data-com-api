@@ -7,7 +7,7 @@ module DataComApi
     property :zip
     property :phone
     property :area_code,        from: :areaCode
-    property :updated_at,       from: :updatedDate,  with: ->(v) { Time.parse(v).utc }
+    property :updated_at,       from: :updatedDate,  with: ->(v) { Time.parse(v.to_s).utc }
     property :seo_contact_url,  from: :seoContactURL
     property :state
     property :first_name,       from: :firstname
