@@ -5,8 +5,6 @@ module DataComApi
   module Responses
     # Abstract class
     class MultipleResultsBase < Base
-
-      MAX_OFFSET = 100_000
       
       def initialize(api_client, received_options)
         @options   = received_options

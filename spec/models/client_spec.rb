@@ -79,6 +79,30 @@ describe DataComApi::Client do
       expect(search_response.total_pages).to be max_pages
     end
 
+    it "returns the last page with only few records" do
+      client.page_size = 3
+      stub_request(
+        :get,
+        URI.join(
+          DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+        ).to_s
+      ).with(
+        'query' => hash_including(DataComApi::QueryParameters.new(
+          page_size: client.page_size,
+          offset:   page_index * client.page_size
+        ).to_hash)
+      ).to_return(
+        body: FactoryGirl.build(
+          :data_com_search_contact_response,
+          page_size: client.page_size,
+          offset: page_index * client.page_size,
+          totalHits: total_contacts
+        ).to_json
+      )
+
+      expect(client.search_contact.all.size).to be total_contacts
+    end
+
     # [2, 20, 49, 50, 51, 75, 100]
     [2].each do |total_contacts_count|
       describe "#all" do
@@ -124,7 +148,7 @@ describe DataComApi::Client do
           end
         end
 
-        it "returns an array containing all records possible for request", focus: true do
+        it "returns an array containing all records possible for request" do
           # DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
 
           expect(client.search_contact.all.size).to be total_contacts

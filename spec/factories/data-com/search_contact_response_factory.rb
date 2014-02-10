@@ -38,15 +38,15 @@ FactoryGirl.define do
         records_per_page = page_size
         records_per_page = contacts_size % page_size if current_page == total_pages
 
-        puts "records per page: #{records_per_page}"
-        puts "contacts_size: #{contacts_size}"
-        puts "page_size: #{page_size}"
-        puts "% #{ contacts_size % page_size }"
-        puts "current_page == total_pages #{ current_page } == #{ total_pages }"
-        # Issue is here, records per page is 50
-        puts total_pages.inspect
-        puts current_page.inspect
-        puts records_per_page.inspect
+        # puts "records per page: #{records_per_page}"
+        # puts "contacts_size: #{contacts_size}"
+        # puts "page_size: #{page_size}"
+        # puts "% #{ contacts_size % page_size }"
+        # puts "current_page == total_pages #{ current_page } == #{ total_pages }"
+        # # Issue is here, records per page is 50
+        # puts total_pages.inspect
+        # puts current_page.inspect
+        # puts records_per_page.inspect
       
         records_per_page
       end
