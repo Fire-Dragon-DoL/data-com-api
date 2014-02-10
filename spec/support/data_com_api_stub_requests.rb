@@ -13,7 +13,7 @@ class DataComApiStubRequestsBase
     stub_search_contact
   end
 
-  def stub_search_contact(searched_contacts_size)
+  def stub_search_contact(page_size, offset, total_hits)
     stub_request(
       :get,
       URI.join(
@@ -23,13 +23,14 @@ class DataComApiStubRequestsBase
       # XXX: Big webmock bug, if query is not a string it doesn't work
       'query' => hash_including(DataComApi::QueryParameters.new(
         page_size: 0,
-        offset:   0
+        offset:    0
       ).to_hash)
     ).to_return(
       body: FactoryGirl.build(
         :data_com_search_contact_response,
         page_size: 0,
-        totalHits: searched_contacts_size
+        offset:    0,
+        totalHits: total_hits
       ).to_json
     )
 
@@ -41,7 +42,9 @@ class DataComApiStubRequestsBase
     ).to_return(
       body: FactoryGirl.build(
         :data_com_search_contact_response,
-        totalHits: searched_contacts_size
+        page_size: page_size,
+        offset:    offset,
+        totalHits: total_hits
       ).to_json
     )
   end

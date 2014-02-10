@@ -48,20 +48,20 @@ describe DataComApi::Client do
   describe "#search_contact" do
 
     it "returns instance of SearchContact" do
-      DataComApiStubRequests.stub_search_contact 500
+      DataComApiStubRequests.stub_search_contact client.page_size, 0, 500
 
       expect(client.search_contact).to be_an_instance_of DataComApi::Responses::SearchContact
     end
 
     it "calls search_contact_raw_json on client" do
-      DataComApiStubRequests.stub_search_contact 500
+      DataComApiStubRequests.stub_search_contact client.page_size, 0, 500
       expect(client).to receive(:search_contact_raw_json).once.and_call_original
 
       client.search_contact.size
     end
 
     it "has a number of pages equal to size / page_size" do
-      DataComApiStubRequests.stub_search_contact 500
+      DataComApiStubRequests.stub_search_contact client.page_size, 0, 500
 
       search_response = client.search_contact
 
@@ -72,14 +72,76 @@ describe DataComApi::Client do
       max_pages    = DataComApi::Responses::Base::MAX_OFFSET
       # Arbitrary number bigger twice maximum amount of results that can be displayed
       max_contacts = max_pages * (client.class::MAX_PAGE_SIZE * 2)
-      DataComApiStubRequests.stub_search_contact max_contacts
+      DataComApiStubRequests.stub_search_contact client.page_size, 0, max_contacts
 
       search_response = client.search_contact
 
       expect(search_response.total_pages).to be max_pages
     end
 
-    describe "#all" do
+    # [2, 20, 49, 50, 51, 75, 100]
+    [2].each do |total_contacts_count|
+      describe "#all" do
+        before do
+          total_pages.times do |page_index|
+            stub_request(
+              :get,
+              URI.join(
+                DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+              ).to_s
+            ).with(
+              'query' => hash_including(DataComApi::QueryParameters.new(
+                page_size: client.page_size,
+                offset:   page_index * client.page_size
+              ).to_hash)
+            ).to_return(
+              body: FactoryGirl.build(
+                :data_com_search_contact_response,
+                page_size: client.page_size,
+                offset: page_index * client.page_size,
+                totalHits: total_contacts
+              ).to_json
+            )
+          end
+        end
+
+        let!(:total_contacts) { total_contacts_count }
+        let!(:total_pages) do
+          pages_count  = 0
+          if client.page_size > 0
+            pages_count  = total_contacts / client.page_size
+            pages_count += 1 unless (total_contacts % client.page_size) == 0
+          end
+
+          pages_count
+        end
+
+        it "returns an array containing only Contact records" do
+
+          search_contact = client.search_contact
+          search_contact.all.each do |contact|
+            expect(contact).to be_an_instance_of DataComApi::Contact
+          end
+        end
+
+        it "returns an array containing all records possible for request", focus: true do
+          # DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
+
+          expect(client.search_contact.all.size).to be total_contacts
+        end
+
+      end
+    end
+
+    describe "#each" do
+      let!(:total_contacts) { 20 }
+      let!(:total_pages) do
+        pages_count  = total_contacts / client.page_size
+        pages_count += 1 unless (total_contacts % client.page_size) == 0
+
+        pages_count
+      end
+
       before do
         total_pages.times do |page|
           stub_request(
@@ -100,37 +162,21 @@ describe DataComApi::Client do
             ).to_json
           )
         end
+        stub_request(
+          :get,
+          URI.join(
+            DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+          ).to_s
+        ).to_return(
+          body: FactoryGirl.build(
+            :data_com_search_contact_response,
+            page_size: client.page_size,
+            totalHits: total_contacts
+          ).to_json
+        )
       end
 
-      let!(:total_contacts) { 20 }
-      let!(:total_pages) do
-        pages_count  = total_contacts / client.page_size
-        pages_count += 1 unless (total_contacts % client.page_size) == 0
-
-        pages_count
-      end
-
-      it "returns an array containing only Contact records" do
-
-        search_contact = client.search_contact
-        search_contact.all.each do |contact|
-          expect(contact).to be_an_instance_of DataComApi::Contact
-        end
-      end
-
-      it "returns an array containing all records possible for request" do
-        DataComApiStubRequests.stub_search_contact total_contacts
-
-        expect(client.search_contact.all.size).to be total_contacts
-      end
-
-    end
-
-    describe "#each" do
-      before do
-        DataComApiStubRequests.stub_search_contact 20
-      end
-
+      # FIXME: Both each methods have various issues with amount of repetitions
       it "yields each contact in response" do
         client.search_contact.each do |contact|
           expect(contact).to be_an_instance_of DataComApi::Contact
@@ -142,7 +188,7 @@ describe DataComApi::Client do
         response         = client.search_contact
         response.each { iterations_count += 1 }
 
-        expect(iterations_count).to be response.total_records
+        expect(iterations_count).to be total_contacts
       end
 
     end

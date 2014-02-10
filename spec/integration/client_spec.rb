@@ -8,7 +8,7 @@ describe DataComApi::Client do
 
   describe "#search_contact" do
     before do
-      DataComApiStubRequests.stub_search_contact 500
+      DataComApiStubRequests.stub_search_contact client.page_size, 0, 500
     end
 
     it { expect(client.search_contact.size).to be > 0 }
