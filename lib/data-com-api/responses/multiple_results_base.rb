@@ -17,8 +17,7 @@ module DataComApi
 
       def size
         result = nil
-        result = cache.read(1)
-        result = cache.read(:size) unless result
+        result = cache.read(:size)
         unless result
           result = cache.fetch(:size) do
             size_options = options.merge(
@@ -55,7 +54,11 @@ module DataComApi
             offset: (index - 1) * page_size
           )
 
-          self.transform_request self.perform_request(page_options)
+          untransformed_request = self.perform_request(page_options)
+          unless cache.exist? :size
+            cache.write(:size, untransformed_request['totalHits'].to_i)
+          end
+          self.transform_request untransformed_request
         end
       end
 
@@ -64,6 +67,7 @@ module DataComApi
 
         records_count  = self.size
         max_records    = MAX_OFFSET * self.page_size
+        binding.pry if records_count.class != Fixnum
         records_count  = max_records if records_count > max_records
 
         @total_records = records_count

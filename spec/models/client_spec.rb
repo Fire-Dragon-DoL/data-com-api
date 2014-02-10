@@ -137,6 +137,14 @@ describe DataComApi::Client do
         end
       end
 
+      it "yields each contact in response" do
+        iterations_count = 0
+        response         = client.search_contact
+        response.each { iterations_count += 1 }
+
+        expect(iterations_count).to be response.total_records
+      end
+
     end
 
   end

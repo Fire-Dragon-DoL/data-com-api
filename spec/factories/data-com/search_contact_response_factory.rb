@@ -11,8 +11,14 @@ FactoryGirl.define do
 
     ignore do
       offset         0
-      page_size      3
-      total_contacts { totalHits }
+      # page_size do
+      #   base_page_size = 3
+
+
+      #   base_page_size
+      # end
+      page_size 3
+      total_contacts { page_size }
     end
 
     initialize_with { new(attributes) }
@@ -22,7 +28,7 @@ FactoryGirl.define do
       page_size     = evaluator.page_size
 
       next if page_size == 0 || contacts_size == 0
-      
+
       total_pages   = contacts_size / page_size
       offset        = evaluator.offset
       total_pages  += 1 unless (contacts_size % page_size) == 0
