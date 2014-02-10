@@ -74,12 +74,13 @@ module DataComApi
       def all
         cache.fetch(:all) do
           pages_count = self.total_pages
-          all_records = Array.new(pages_count * self.page_size)
+          all_records = Array.new(self.total_records)
           break all_records if pages_count == 0
 
           current_page      = 1
           next_page_data    = Thread.future { self.page(current_page) }
           current_page_data = nil
+          current_record    = 0
 
           
           pages_count.times do
@@ -90,9 +91,10 @@ module DataComApi
               next_page_data = Thread.future { self.page(current_page + 1) }
             end
 
-            unless current_page_data
+            unless current_page_data.nil?
               (~current_page_data).each do |record|
-                all_records << record
+                all_records[current_record]  = record
+                current_record              += 1
               end
             end
 
@@ -106,18 +108,11 @@ module DataComApi
       alias_method :to_a, :all
 
       def each
-        # pages_count  = self.total_pages
-        # current_page = 0
-        
-        # pages_count
+        self.each_page { |current_page| current_page.each { |record| yield record } }
       end
 
-      def each_with_index
-        index = 0
-        self.each do |obj|
-          yield(obj, index)
-          index += 1
-        end
+      def each_page
+        self.total_pages.times { |current_page| yield self.page(current_page + 1) }
       end
 
       protected

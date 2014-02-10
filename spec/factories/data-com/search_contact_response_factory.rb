@@ -6,12 +6,14 @@ require 'data-com-api/client'
 FactoryGirl.define do
 
   factory :data_com_search_contact_response, class: Hashie::Mash do
-    ignore do
-      page_size 3
-    end
-
     totalHits 0
-    contacts []
+    contacts  []
+
+    ignore do
+      offset         0
+      page_size      3
+      total_contacts { totalHits }
+    end
 
     initialize_with { new(attributes) }
 
@@ -19,14 +21,21 @@ FactoryGirl.define do
       contacts_size = data_com_search_contact_response[:totalHits]
       page_size     = evaluator.page_size
 
-      if contacts_size > 0 && page_size > 0
-        page_size = contacts_size if contacts_size < page_size
+      next if page_size == 0 || contacts_size == 0
+      
+      total_pages   = contacts_size / page_size
+      offset        = evaluator.offset
+      total_pages  += 1 unless (contacts_size % page_size) == 0
 
-        data_com_search_contact_response.contacts = FactoryGirl.build_list(
-          :data_com_contact,
-          page_size
-        ) if contacts_size > 0
-      end
+      current_page      = offset / page_size
+      current_page     += 1 unless (offset % page_size) == 0
+      records_per_page  = page_size
+      records_per_page  = offset % page_size if current_page == total_pages
+    
+      data_com_search_contact_response[:contacts] = FactoryGirl.build_list(
+        :data_com_contact,
+        records_per_page
+      ) if records_per_page > 0
     end
   end
 

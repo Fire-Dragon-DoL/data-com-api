@@ -32,7 +32,7 @@ describe DataComApi::Client do
   describe "#page_size=" do
 
     it "accepts values between 1 and 100" do
-      expect{client.page_size = Random.rand(101)}.not_to raise_error
+      expect{client.page_size = Random.rand(100) + 1}.not_to raise_error
     end
 
     it "doesn't accept values > 100" do
@@ -81,7 +81,7 @@ describe DataComApi::Client do
 
     describe "#all" do
       before do
-        (total_contacts / client.page_size).times do |page|
+        total_pages.times do |page|
           stub_request(
             :get,
             URI.join(
@@ -103,18 +103,38 @@ describe DataComApi::Client do
       end
 
       let!(:total_contacts) { 20 }
+      let!(:total_pages) do
+        pages_count  = total_contacts / client.page_size
+        pages_count += 1 unless (total_contacts % client.page_size) == 0
 
-      it "#all returns an array containing only Contact records" do
+        pages_count
+      end
 
-        client.search_contact.all.each do |contact|
+      it "returns an array containing only Contact records" do
+
+        search_contact = client.search_contact
+        search_contact.all.each do |contact|
           expect(contact).to be_an_instance_of DataComApi::Contact
         end
       end
 
-      it "#all returns an array containing all records possible for request" do
+      it "returns an array containing all records possible for request" do
         DataComApiStubRequests.stub_search_contact total_contacts
 
         expect(client.search_contact.all.size).to be total_contacts
+      end
+
+    end
+
+    describe "#each" do
+      before do
+        DataComApiStubRequests.stub_search_contact 20
+      end
+
+      it "yields each contact in response" do
+        client.search_contact.each do |contact|
+          expect(contact).to be_an_instance_of DataComApi::Contact
+        end
       end
 
     end
