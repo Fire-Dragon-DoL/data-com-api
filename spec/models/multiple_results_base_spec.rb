@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'data-com-api/client'
 require 'data-com-api/contact'
+require 'data-com-api/responses/base'
 require 'data-com-api/responses/multiple_results_base'
 require 'data-com-api/responses/search_contact'
 
@@ -64,7 +65,7 @@ describe DataComApi::Responses::MultipleResultsBase do
 
   end
 
-  describe "#total_pages", focus: true do
+  describe "#total_pages" do
   
     it "returns 11 pages for 32 records" do
       client.page_size = 3
@@ -100,6 +101,53 @@ describe DataComApi::Responses::MultipleResultsBase do
       )
 
       expect(client.search_contact.total_pages).to be 10
+    end
+  
+    it "returns #{ DataComApi::Responses::Base::MAX_OFFSET } pages for a lot of records" do
+      client.page_size = 100
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(
+          :data_com_search_contact_response,
+          totalHits: DataComApi::Responses::Base::MAX_OFFSET * client.page_size * 2
+        )
+      )
+
+      expect(client.search_contact.total_pages).to be DataComApi::Responses::Base::MAX_OFFSET
+    end
+
+  end
+
+  describe "#total_records" do
+  
+    it "returns 32 records for 32 records" do
+      client.page_size = 3
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 32)
+      )
+
+      expect(client.search_contact.total_records).to be 32
+    end
+  
+    it "returns 0 records for 0 records" do
+      client.page_size = 1
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(:data_com_search_contact_response, totalHits: 0)
+      )
+
+      expect(client.search_contact.total_records).to be 0
+    end
+  
+    it "returns #{ DataComApi::Responses::Base::MAX_OFFSET } * client.page_size
+        records for a lot of records" do
+      client.page_size = 100
+      client.stub(:search_contact_raw_json).and_return(
+        FactoryGirl.build(
+          :data_com_search_contact_response,
+          totalHits: DataComApi::Responses::Base::MAX_OFFSET * client.page_size * 2
+        )
+      )
+
+      expect(client.search_contact.total_records).to be DataComApi::Responses::Base::MAX_OFFSET * client.page_size
     end
 
   end

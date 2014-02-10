@@ -34,6 +34,8 @@ module DataComApi
       end
 
       def total_pages
+        return @total_pages if @total_pages
+
         search_total_hits = self.size
         return 0 if search_total_hits == 0
 
@@ -43,7 +45,7 @@ module DataComApi
         res += 1          unless (search_total_hits % page_size) == 0
         res  = MAX_OFFSET if real_total_pages > MAX_OFFSET
 
-        res
+        @total_pages = res
       end
 
       # Be careful, page is 1-based
@@ -55,6 +57,16 @@ module DataComApi
 
           self.transform_request self.perform_request(page_options)
         end
+      end
+
+      def total_records
+        return @total_records if @total_records
+
+        records_count  = self.size
+        max_records    = MAX_OFFSET * self.page_size
+        records_count  = max_records if records_count > max_records
+
+        @total_records = records_count
       end
 
       # Be careful, this will load all records in memory, check total_records
