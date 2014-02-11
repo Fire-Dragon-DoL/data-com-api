@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'data-com-api/paging_maths'
 
-describe DataComApi::PagingMaths do
+describe DataComApi::PagingMaths, focus: true do
   subject(:paging_maths) do
     FactoryGirl.build(:paging_maths,
       max_offset:    100_000,
@@ -69,9 +69,9 @@ describe DataComApi::PagingMaths do
         expect(paging_maths.page_index(:last)).to be 1_000
       end
 
-      it "is 33 334 when using :last and page_size is 3" do
+      it "is 33 333 when using :last and page_size is 3" do
         paging_maths.page_size = 3
-        expect(paging_maths.page_index(:last)).to be 33_334
+        expect(paging_maths.page_index(:last)).to be 33_333
       end
 
     end
@@ -103,13 +103,17 @@ describe DataComApi::PagingMaths do
       expect{paging_maths.records_per_page(0)}.to raise_error ArgumentError
     end
 
+    it "is nil when page > total_pages" do
+      expect(paging_maths.records_per_page(paging_maths.total_pages + 1)).to be_nil
+    end
+
     it "is the same amount of records when using 1 or :first" do
       expect(paging_maths.records_per_page(:first)).to be paging_maths.records_per_page(1)
     end
 
-    it "is the same amount of records when using 33 334 (last) with page_size 3 or :last" do
+    it "is the same amount of records when using 33 333 (last) with page_size 3 or :last" do
       paging_maths.page_size = 3
-      expect(paging_maths.records_per_page(:last)).to be paging_maths.records_per_page(33_334)
+      expect(paging_maths.records_per_page(:last)).to be paging_maths.records_per_page(33_333)
     end
 
     it "is nil when page_size = 0" do
@@ -127,13 +131,14 @@ describe DataComApi::PagingMaths do
       expect(paging_maths.records_per_page(1)).to be_nil
     end
 
-    it "is 1 on page 33 334 with page_size 3" do
-      paging_maths.page_size  = 3
-      expect(paging_maths.records_per_page(33_334)).to be 1
+    it "is 3 on page 33 333 with page_size 3" do
+      paging_maths.page_size = 3
+      expect(paging_maths.records_per_page(33_333)).to be 3
     end
 
-    it "is page_size when not on last page" do
-      expect(paging_maths.records_per_page(1)).to be paging_maths.page_size
+    it "is page_size when on last page" do
+      paging_maths.page_size = 3
+      expect(paging_maths.records_per_page(33_333)).to be paging_maths.page_size
     end
 
   end
@@ -149,17 +154,22 @@ describe DataComApi::PagingMaths do
       expect(paging_maths.page_from_offset(0)).to be_nil
     end
 
+    it "is nil when offset > real_max_offset" do
+      paging_maths.page_size = 3
+      expect(paging_maths.page_from_offset(100_000)).to be_nil
+    end
+
+    it "is not nil when offset = real_max_offset" do
+      paging_maths.page_size = 3
+      expect(paging_maths.page_from_offset(99_999)).to be 33_333
+    end
+
     it "is 1 when offset is 0" do
       expect(paging_maths.page_from_offset(0)).to be 1
     end
 
     it "is 100 when offset is 10 000" do
       expect(paging_maths.page_from_offset(10_000)).to be 100
-    end
-
-    it "is 33 334 when offset is 100 000 and page_size = 3" do
-      paging_maths.page_size = 3
-      expect(paging_maths.page_from_offset(100_000)).to be 33_334
     end
 
   end
@@ -183,19 +193,19 @@ describe DataComApi::PagingMaths do
       expect(paging_maths.offset_from_page(1)).to be 0
     end
 
-    it "is 10_000 when page is 100", focus: true do
-      expect(paging_maths.offset_from_page(100)).to be 10_000
+    it "is 100 when page is 2" do
+      expect(paging_maths.offset_from_page(2)).to be 100
     end
 
-    it "is 100 000 when page is 33 334 and page_size = 3" do
+    it "is 99_999 when page is 33 333 and page_size = 3" do
       paging_maths.page_size = 3
-      expect(paging_maths.offset_from_page(33_334)).to be 100_000
+      expect(paging_maths.offset_from_page(33_333)).to be 99_999
     end
 
-    it "is 100 000 when page is 33 334 and page_size = 3 and total_records 99 999", focus: true do
+    it "is 99 999 when page is 33 333 and page_size = 3 and total_records 99 999" do
       paging_maths.page_size     = 3
       paging_maths.total_records = 99_999
-      expect(paging_maths.offset_from_page(33_334)).to be 100_000
+      expect(paging_maths.offset_from_page(33_333)).to be 99_999
     end
 
   end
@@ -211,14 +221,15 @@ describe DataComApi::PagingMaths do
       expect(paging_maths.total_pages).to be 1_000
     end
 
-    it "is 33 334 when page_size = 3" do
+    it "is 33 333 when page_size = 3" do
       paging_maths.page_size = 3
-      expect(paging_maths.total_pages).to be 33_334
+      expect(paging_maths.total_pages).to be 33_333
     end
 
-    it "is equal to total_records when total_records < page_size" do
+    it "is equal to 1 when total_records < page_size" do
       paging_maths.total_records = 3
-      expect(paging_maths.total_records).to be paging_maths.total_records
+      paging_maths.page_size     = 4
+      expect(paging_maths.total_pages).to be 1
     end
 
   end

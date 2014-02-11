@@ -38,6 +38,12 @@ module DataComApi
       cache.clear
     end
 
+    def real_max_offset
+      cache.fetch(:real_max_offset) do
+        self.max_offset - (self.max_offset % self.page_size)
+      end
+    end
+
     # Methods
 
     def any_record?
@@ -51,9 +57,12 @@ module DataComApi
         next 0 unless any_record?
 
         records_amount = self.total_records
-        records_amount = self.max_offset if self.total_records > self.max_offset
-        res            = records_amount / self.page_size
-        res           += 1 unless (records_amount % self.page_size) == 0
+        if self.total_records > self.real_max_offset
+          records_amount = self.real_max_offset
+        end
+
+        res = records_amount / self.page_size
+        res = 1 if self.total_records < self.page_size
 
         res
       end
@@ -94,9 +103,9 @@ module DataComApi
         eos
       end
 
-      page  = value / self.page_size
-      page += 1 unless (value % self.page_size) == 0
-      page  = 1 if value < self.page_size
+      page = value / self.page_size
+      page = 1   if value < self.page_size
+      page = nil if value > self.real_max_offset
 
       cache.write(cache_page, page)
       page
@@ -109,21 +118,34 @@ module DataComApi
       return cache.read(cache_page) if cache.exist? cache_page
 
       if value > self.max_offset
-        raise ArgumentError, "Offset can't be greater than max_offset"
+        raise ArgumentError, <<-eos
+          Offset must not be greater than max_offset (##{ self.max_offset })
+        eos
       end
       page = self.page_index(value)
 
-      binding.pry
       # This happens when page > total_pages
-      return nil if page.nil?
+      if page.nil?
+        cache.write(cache_page, nil)
+        return nil
+      end
 
-      records_count = self.total_records
-      records_count = self.max_offset if records_count > self.max_offset
-      offset = (page - 1) * page_size
-      offset = records_count if page == self.total_pages
+      offset = (value - 1) * self.page_size
+      offset = self.real_max_offset if page == self.total_pages
 
       cache.write(cache_page, offset)
       offset
+    end
+
+    def records_per_page(page)
+      cache_page = :"records_per_page#{ page }"
+      cache.fetch(cache_page) do
+        page = self.page_index(page)
+
+        next nil if page.nil?
+
+        self.page_size
+      end
     end
 
     private
