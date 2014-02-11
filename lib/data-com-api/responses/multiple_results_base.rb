@@ -1,4 +1,5 @@
 require 'thread/future'
+require 'data-com-api/paging_maths'
 require 'data-com-api/responses/base'
 
 module DataComApi
@@ -7,15 +8,19 @@ module DataComApi
     class MultipleResultsBase < Base
       
       def initialize(api_client, received_options)
-        @options   = received_options
+        @options = received_options
         super(api_client)
         # Cache pagesize, MUST NOT change between requests
-        @page_size = client.page_size
+        @page_size    = client.page_size
+        @paging_maths = DataComApi::PagingMaths.new(
+          page_size:  page_size,
+          max_offset: MAX_OFFSET
+        )
       end
 
       def size
         result = nil
-        result = cache.read(:size)
+        result = cache.read(:size) if cache.exist?(:size)
         unless result
           result = cache.fetch(:size) do
             size_options = options.merge(
@@ -25,6 +30,7 @@ module DataComApi
             
             self.perform_request(size_options)['totalHits'].to_i
           end
+          paging_maths.page_size = result
         end
 
         result
@@ -33,42 +39,29 @@ module DataComApi
       def total_pages
         return @total_pages if @total_pages
 
-        search_total_hits = self.size
-        return 0 if search_total_hits == 0
+        calculate_page_size!
 
-        real_total_pages = search_total_hits / page_size
-
-        res  = real_total_pages
-        res += 1          unless (search_total_hits % page_size) == 0
-        res  = MAX_OFFSET if real_total_pages > MAX_OFFSET
-
-        @total_pages = res
+        paging_maths.total_pages
       end
 
       # Be careful, page is 1-based
       def page(index)
         cache.fetch(index) do
+          calculate_page_size!
           page_options = options.merge(
-            offset: (index - 1) * page_size
+            offset: paging_maths.offset_from_page(index)
           )
 
-          untransformed_request = self.perform_request(page_options)
-          unless cache.exist? :size
-            cache.write(:size, untransformed_request['totalHits'].to_i)
-          end
-          self.transform_request untransformed_request
+          self.transform_request self.perform_request(page_options)
         end
       end
 
       def total_records
         return @total_records if @total_records
 
-        records_count  = self.size
-        max_records    = MAX_OFFSET * self.page_size
-        binding.pry if records_count.class != Fixnum
-        records_count  = max_records if records_count > max_records
+        calculate_page_size!
 
-        @total_records = records_count
+        @total_records = paging_maths.total_records
       end
 
       # Be careful, this will load all records in memory, check total_records
@@ -83,7 +76,6 @@ module DataComApi
           next_page_data    = Thread.future { self.page(current_page) }
           current_page_data = nil
           current_record    = 0
-
           
           pages_count.times do
             current_page_data = next_page_data
@@ -125,6 +117,16 @@ module DataComApi
 
         def options
           @options
+        end
+
+      private
+
+        def calculate_page_size!
+          self.size
+        end
+
+        def paging_maths
+          @paging_maths
         end
 
     end
