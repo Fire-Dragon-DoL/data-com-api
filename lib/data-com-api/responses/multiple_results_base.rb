@@ -109,6 +109,10 @@ module DataComApi
         self.total_pages.times { |current_page| yield self.page(current_page + 1) }
       end
 
+      def real_max_offset
+        paging_maths.real_max_offset
+      end
+
       protected
 
         def page_size

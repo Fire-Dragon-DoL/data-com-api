@@ -5,7 +5,7 @@ require 'data-com-api/responses/base'
 require 'data-com-api/responses/multiple_results_base'
 require 'data-com-api/responses/search_contact'
 
-describe DataComApi::Responses::MultipleResultsBase do
+describe DataComApi::Responses::MultipleResultsBase, focus: true do
 
   let!(:client) { FactoryGirl.build(:client) }
   subject(:multiple_results_response) do
@@ -137,8 +137,7 @@ describe DataComApi::Responses::MultipleResultsBase do
       expect(client.search_contact.total_records).to be 0
     end
   
-    it "returns #{ DataComApi::Responses::Base::MAX_OFFSET } * client.page_size
-        records for a lot of records" do
+    it "returns response.real_max_offset records for a lot of records" do
       client.page_size = 100
       client.stub(:search_contact_raw_json).and_return(
         FactoryGirl.build(
@@ -147,7 +146,8 @@ describe DataComApi::Responses::MultipleResultsBase do
         )
       )
 
-      expect(client.search_contact.total_records).to be DataComApi::Responses::Base::MAX_OFFSET * client.page_size
+      response = client.search_contact
+      expect(response.total_records).to be response.real_max_offset
     end
 
   end
