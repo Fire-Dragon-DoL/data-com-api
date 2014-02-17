@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'data-com-api/paging_maths'
 
-describe DataComApi::PagingMaths do
+describe DataComApi::PagingMaths, focus: true do
   subject(:paging_maths) do
     FactoryGirl.build(:paging_maths,
       max_offset:    100_000,
@@ -43,12 +43,12 @@ describe DataComApi::PagingMaths do
 
   describe "#page_index" do
 
-    it "raises error when 0 is passed" do
-      expect{paging_maths.page_index(0)}.to raise_error ArgumentError
+    it "is nil when 0 is passed" do
+      expect(paging_maths.page_index(0)).to be_nil
     end
 
-    it "raises error when nil is passed" do
-      expect{paging_maths.page_index(nil)}.to raise_error ArgumentError
+    it "is nil when nil is passed" do
+      expect(paging_maths.page_index(nil)).to be_nil
     end
 
     it "doesn't raise error when value > total_pages is passed" do
@@ -99,8 +99,8 @@ describe DataComApi::PagingMaths do
 
   describe "#records_per_page" do
 
-    it "raises error when 0 is passed" do
-      expect{paging_maths.records_per_page(0)}.to raise_error ArgumentError
+    it "is nil when 0 is passed" do
+      expect(paging_maths.records_per_page(0)).to be_nil
     end
 
     it "is nil when page > total_pages" do
@@ -141,12 +141,18 @@ describe DataComApi::PagingMaths do
       expect(paging_maths.records_per_page(33_333)).to be paging_maths.page_size
     end
 
+    it "is 2 when only one page of size 3 and there are 2 records" do
+      paging_maths.page_size     = 3
+      paging_maths.total_records = 2
+      expect(paging_maths.records_per_page(1)).to be 2
+    end
+
   end
 
   describe "#page_from_offset" do
 
-    it "raises error when offset > max_offset" do
-      expect{paging_maths.page_from_offset(paging_maths.max_offset + 1)}.to raise_error ArgumentError
+    it "is nil when offset > max_offset" do
+      expect(paging_maths.page_from_offset(paging_maths.max_offset + 1)).to be_nil
     end
 
     it "is nil when no records available" do
@@ -170,6 +176,10 @@ describe DataComApi::PagingMaths do
 
     it "is 100 when offset is 10 000" do
       expect(paging_maths.page_from_offset(10_000)).to be 100
+    end
+
+    it "is 2 when offset is 101" do
+      expect(paging_maths.page_from_offset(101)).to be 2
     end
 
   end

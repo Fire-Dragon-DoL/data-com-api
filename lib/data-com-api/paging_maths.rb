@@ -81,11 +81,11 @@ module DataComApi
       return cache.read(cache_page) if cache.exist? cache_page
 
       case page
-      when 0   then raise ArgumentError, "Page index can't be 0"
-      when nil then raise ArgumentError, "Page index can't be nil"
+      when 0   then page = nil
+      when nil then page = nil
+      else
+        page = nil if page > self.total_pages
       end
-
-      page = nil if page > self.total_pages
 
       cache.write(cache_page, page)
       page
@@ -97,15 +97,14 @@ module DataComApi
       cache_page = :"page_from_offset_#{ value }"
       return cache.read(cache_page) if cache.exist? cache_page
 
-      if value > self.max_offset
-        raise ArgumentError, <<-eos
-          Offset must not be greater than max_offset (##{ self.max_offset })
-        eos
-      end
+      page = nil
 
-      page = value / self.page_size
-      page = 1   if value < self.page_size
-      page = nil if value > self.real_max_offset
+      unless value > self.max_offset
+        page  = value / self.page_size
+        page += 1   unless (value % self.page_size) == 0
+        page += 1   if value == 0
+        page  = nil if value > self.real_max_offset
+      end
 
       cache.write(cache_page, page)
       page
@@ -117,11 +116,6 @@ module DataComApi
       cache_page = :"offset_from_page_#{ value }"
       return cache.read(cache_page) if cache.exist? cache_page
 
-      if value > self.max_offset
-        raise ArgumentError, <<-eos
-          Offset must not be greater than max_offset (##{ self.max_offset })
-        eos
-      end
       page = self.page_index(value)
 
       # This happens when page > total_pages
@@ -144,7 +138,16 @@ module DataComApi
 
         next nil if page.nil?
 
-        self.page_size
+        if page == self.total_pages
+          records_count = self.page_size * self.total_pages
+          if records_count > self.total_records
+            records_count = records_count - self.total_records
+          else
+            self.page_size
+          end
+        else
+          self.page_size
+        end
       end
     end
 

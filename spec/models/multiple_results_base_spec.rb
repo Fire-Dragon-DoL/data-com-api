@@ -5,7 +5,7 @@ require 'data-com-api/responses/base'
 require 'data-com-api/responses/multiple_results_base'
 require 'data-com-api/responses/search_contact'
 
-describe DataComApi::Responses::MultipleResultsBase, focus: true do
+describe DataComApi::Responses::MultipleResultsBase do
 
   let!(:client) { FactoryGirl.build(:client) }
   subject(:multiple_results_response) do
@@ -67,13 +67,13 @@ describe DataComApi::Responses::MultipleResultsBase, focus: true do
 
   describe "#total_pages" do
   
-    it "returns 11 pages for 32 records" do
+    it "returns 10 pages for 32 records" do
       client.page_size = 3
       client.stub(:search_contact_raw_json).and_return(
         FactoryGirl.build(:data_com_search_contact_response, totalHits: 32)
       )
 
-      expect(client.search_contact.total_pages).to be 11
+      expect(client.search_contact.total_pages).to be 10
     end
   
     it "returns 0 pages for 0 records" do
