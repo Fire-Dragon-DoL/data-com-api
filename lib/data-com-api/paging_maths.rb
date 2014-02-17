@@ -44,6 +44,15 @@ module DataComApi
       end
     end
 
+    # Used to calculate the records that can be viewed with current "settings"
+    def displayable_records
+      cache.fetch(:displayable_records) do
+        records = self.total_records
+        records = self.real_max_offset if self.total_records > self.real_max_offset
+        records
+      end
+    end
+
     # Methods
 
     def any_record?
@@ -139,11 +148,11 @@ module DataComApi
         next nil if page.nil?
 
         if page == self.total_pages
-          records_count = self.page_size * self.total_pages
-          if records_count > self.total_records
-            records_count = records_count - self.total_records
-          else
+          remaining_records = self.displayable_records % self.page_size
+          if remaining_records == 0
             self.page_size
+          else
+            remaining_records
           end
         else
           self.page_size
