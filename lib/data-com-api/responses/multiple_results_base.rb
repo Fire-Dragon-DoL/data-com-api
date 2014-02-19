@@ -30,7 +30,7 @@ module DataComApi
             
             self.perform_request(size_options)['totalHits'].to_i
           end
-          paging_maths.page_size = result
+          paging_maths.total_records = result
         end
 
         result
@@ -39,7 +39,7 @@ module DataComApi
       def total_pages
         return @total_pages if @total_pages
 
-        calculate_page_size!
+        calculate_total_records!
 
         paging_maths.total_pages
       end
@@ -47,7 +47,7 @@ module DataComApi
       # Be careful, page is 1-based
       def page(index)
         cache.fetch(index) do
-          calculate_page_size!
+          calculate_total_records!
           page_options = options.merge(
             offset: paging_maths.offset_from_page(index)
           )
@@ -59,7 +59,7 @@ module DataComApi
       def total_records
         return @total_records if @total_records
 
-        calculate_page_size!
+        calculate_total_records!
 
         @total_records = paging_maths.total_records
       end
@@ -125,7 +125,7 @@ module DataComApi
 
       private
 
-        def calculate_page_size!
+        def calculate_total_records!
           self.size
         end
 

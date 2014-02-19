@@ -91,6 +91,7 @@ describe DataComApi::Responses::MultipleResultsBase do
         FactoryGirl.build(:data_com_search_contact_response, totalHits: 2)
       )
 
+
       expect(client.search_contact.total_pages).to be 1
     end
   
@@ -103,7 +104,7 @@ describe DataComApi::Responses::MultipleResultsBase do
       expect(client.search_contact.total_pages).to be 10
     end
   
-    it "returns #{ DataComApi::Responses::Base::MAX_OFFSET } pages for a lot of records" do
+    it "returns real_max_offset / page_size for a lot of records" do
       client.page_size = 100
       client.stub(:search_contact_raw_json).and_return(
         FactoryGirl.build(
@@ -112,7 +113,11 @@ describe DataComApi::Responses::MultipleResultsBase do
         )
       )
 
-      expect(client.search_contact.total_pages).to be DataComApi::Responses::Base::MAX_OFFSET
+      response = client.search_contact
+
+      expect(response.total_pages).to be(
+        response.real_max_offset / client.page_size
+      )
     end
 
   end
@@ -137,16 +142,20 @@ describe DataComApi::Responses::MultipleResultsBase do
       expect(client.search_contact.total_records).to be 0
     end
   
+    # XXX: This test is meaningless, I don't even know why I built it,
+    #      real_max_offset won't be = total_records unless
+    #      max_offset = total_records
     it "returns response.real_max_offset records for a lot of records" do
       client.page_size = 100
       client.stub(:search_contact_raw_json).and_return(
         FactoryGirl.build(
           :data_com_search_contact_response,
-          totalHits: DataComApi::Responses::Base::MAX_OFFSET * client.page_size * 2
+          totalHits: DataComApi::Responses::Base::MAX_OFFSET
         )
       )
 
       response = client.search_contact
+
       expect(response.total_records).to be response.real_max_offset
     end
 

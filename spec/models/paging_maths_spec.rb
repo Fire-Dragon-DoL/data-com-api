@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'data-com-api/paging_maths'
 
-describe DataComApi::PagingMaths, focus: true do
+describe DataComApi::PagingMaths do
   subject(:paging_maths) do
     FactoryGirl.build(:paging_maths,
       max_offset:    100_000,
