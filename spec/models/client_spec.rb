@@ -4,6 +4,7 @@ require 'data-com-api/responses/base'
 require 'data-com-api/responses/search_contact'
 require 'data-com-api/api_uri'
 require 'data-com-api/client'
+require 'data-com-api/paging_maths'
 
 describe DataComApi::Client do
 
@@ -123,32 +124,39 @@ describe DataComApi::Client do
               ).to_s
             ).with(
               'query' => hash_including(DataComApi::QueryParameters.new(
-                page_size: client.page_size,
-                offset:   page_index * client.page_size
+                page_size: internal_paging_maths.page_size,
+                offset:    internal_paging_maths.offset_from_page(page_index)
               ).to_hash)
             ).to_return(
               body: FactoryGirl.build(
                 :data_com_search_contact_response,
-                page_size: client.page_size,
-                offset: page_index * client.page_size,
-                totalHits: total_contacts
+                page_size: internal_paging_maths.page_size,
+                offset:    internal_paging_maths.offset_from_page(page_index),
+                totalHits: internal_paging_maths.records_per_page(page_index)
               ).to_json
             )
           end
         end
 
-        let!(:total_contacts) { total_contacts_count }
-        let!(:total_pages) do
-          pages_count  = 0
-          if client.page_size > 0
-            pages_count  = total_contacts / client.page_size
-            pages_count += 1 unless (total_contacts % client.page_size) == 0
-          end
+        let!(:internal_paging_maths) do
+          pm = DataComApi::PagingMaths.new(page_size:     client.page_size,
+                                           total_records: total_contacts_count,
+                                           max_offset:    100_000)
 
-          pages_count
+          pm
         end
+        let!(:total_contacts) { internal_paging_maths.total_records }
+        # let!(:total_pages) do
+        #   pages_count  = 0
+        #   if client.page_size > 0
+        #     pages_count  = total_contacts / client.page_size
+        #     pages_count += 1 unless (total_contacts % client.page_size) == 0
+        #   end
 
-        it "returns an array containing only Contact records", broken: true do
+        #   pages_count
+        # end
+
+        it "returns an array containing only Contact records" do
 
           search_contact = client.search_contact
           search_contact.all.each do |contact|
@@ -156,8 +164,8 @@ describe DataComApi::Client do
           end
         end
 
-        it "returns an array containing all records possible for request", broken: true do
-          # DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
+        it "returns an array containing all records possible for request" do
+          DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
 
           expect(client.search_contact.all.size).to be total_contacts
         end
