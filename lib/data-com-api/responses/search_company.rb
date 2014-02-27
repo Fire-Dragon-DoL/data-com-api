@@ -1,10 +1,10 @@
 require 'data-com-api/company'
-require 'data-com-api/responses/multiple_results_base'
+require 'data-com-api/responses/search_base'
 require 'data-com-api/responses/base'
 
 module DataComApi
   module Responses
-    class SearchCompany < MultipleResultsBase
+    class SearchCompany < SearchBase
 
       protected
 

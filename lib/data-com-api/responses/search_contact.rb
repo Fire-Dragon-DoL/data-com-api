@@ -1,10 +1,10 @@
 require 'data-com-api/contact'
-require 'data-com-api/responses/multiple_results_base'
+require 'data-com-api/responses/search_base'
 require 'data-com-api/responses/base'
 
 module DataComApi
   module Responses
-    class SearchContact < MultipleResultsBase
+    class SearchContact < SearchBase
 
       protected
 
@@ -15,6 +15,7 @@ module DataComApi
         end
 
         def perform_request(received_options)
+          # puts "received_options #{ received_options.inspect }"
           client.search_contact_raw_json(received_options)
         end
       

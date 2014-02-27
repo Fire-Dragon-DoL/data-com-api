@@ -18,6 +18,7 @@ module DataComApi
     # We start at 1, 0 is a special case
     MIN_PAGE_SIZE       = 1
     MAX_PAGE_SIZE       = 100
+    MAX_OFFSET          = 100_000
 
     attr_reader :api_calls_count
     attr_reader :token
@@ -75,6 +76,10 @@ module DataComApi
         ApiURI.search_contact,
         generate_params(options)
       )
+      # puts <<-eos
+      #   response: #{ response.inspect }
+      #   options:  #{ generate_params(options) }
+      # eos
       increase_api_calls_count!
 
       response.body
