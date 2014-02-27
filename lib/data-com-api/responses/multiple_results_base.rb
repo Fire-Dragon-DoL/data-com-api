@@ -1,4 +1,3 @@
-require 'thread/future'
 require 'data-com-api/paging_maths'
 require 'data-com-api/responses/base'
 
@@ -68,32 +67,8 @@ module DataComApi
       # before doing such a thing
       def all
         cache.fetch(:all) do
-          pages_count = self.total_pages
-          all_records = Array.new(self.total_records)
-          break all_records if pages_count == 0
-
-          current_page      = 1
-          next_page_data    = Thread.future { self.page(current_page) }
-          current_page_data = nil
-          current_record    = 0
-          
-          pages_count.times do
-            current_page_data = next_page_data
-            if current_page == pages_count
-              next_page_data = nil
-            else
-              next_page_data = Thread.future { self.page(current_page + 1) }
-            end
-
-            unless current_page_data.nil?
-              (~current_page_data).each do |record|
-                all_records[current_record]  = record
-                current_record              += 1
-              end
-            end
-
-            current_page += 1
-          end
+          all_records = Array.new(displayable_records)
+          self.each { |record| all_records << record }
 
           all_records
         end

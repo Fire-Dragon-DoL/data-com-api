@@ -116,7 +116,28 @@ describe DataComApi::Client do
     [2].each do |total_contacts_count|
       describe "#all" do
         before do
-          total_pages.times do |page_index|
+          # Mock total_records request
+          stub_request(
+            :get,
+            URI.join(
+              DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+            ).to_s
+          ).with(
+            'query' => hash_including(DataComApi::QueryParameters.new(
+              page_size: 0,
+              offset:    0
+            ).to_hash)
+          ).to_return(
+            body: FactoryGirl.build(
+              :data_com_search_contact_response,
+              page_size: 0,
+              totalHits: internal_paging_maths.total_records
+            ).to_json
+          )
+
+          # Mock each page
+          total_pages.times do |page_index_zero_based|
+            page_index = page_index_zero_based + 1
             stub_request(
               :get,
               URI.join(
@@ -131,7 +152,6 @@ describe DataComApi::Client do
               body: FactoryGirl.build(
                 :data_com_search_contact_response,
                 page_size: internal_paging_maths.page_size,
-                offset:    internal_paging_maths.offset_from_page(page_index),
                 totalHits: internal_paging_maths.records_per_page(page_index)
               ).to_json
             )
@@ -139,22 +159,12 @@ describe DataComApi::Client do
         end
 
         let!(:internal_paging_maths) do
-          pm = DataComApi::PagingMaths.new(page_size:     client.page_size,
-                                           total_records: total_contacts_count,
-                                           max_offset:    100_000)
-
-          pm
+          DataComApi::PagingMaths.new(page_size:     client.page_size,
+                                      total_records: total_contacts_count,
+                                      max_offset:    100_000)
         end
         let!(:total_contacts) { internal_paging_maths.total_records }
-        # let!(:total_pages) do
-        #   pages_count  = 0
-        #   if client.page_size > 0
-        #     pages_count  = total_contacts / client.page_size
-        #     pages_count += 1 unless (total_contacts % client.page_size) == 0
-        #   end
-
-        #   pages_count
-        # end
+        let!(:total_pages)    { internal_paging_maths.total_pages   }
 
         it "returns an array containing only Contact records" do
 
@@ -164,10 +174,10 @@ describe DataComApi::Client do
           end
         end
 
-        it "returns an array containing all records possible for request" do
-          DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
+        it "returns an array containing all records possible for request", focus: true do
+          # DataComApiStubRequests.stub_search_contact client.page_size, 0, total_contacts
 
-          expect(client.search_contact.all.size).to be total_contacts
+          expect(client.search_contact.all.size).to eq total_contacts
         end
 
       end

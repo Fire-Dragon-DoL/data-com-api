@@ -29,7 +29,6 @@ class DataComApiStubRequestsBase
       body: FactoryGirl.build(
         :data_com_search_contact_response,
         page_size: 0,
-        offset:    0,
         totalHits: total_hits
       ).to_json
     )
@@ -43,7 +42,6 @@ class DataComApiStubRequestsBase
       body: FactoryGirl.build(
         :data_com_search_contact_response,
         page_size: page_size,
-        offset:    offset,
         totalHits: total_hits
       ).to_json
     )

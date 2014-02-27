@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'httparty',      '~> 0.12'
   spec.add_dependency 'activesupport', '~> 4.0'
   spec.add_dependency 'hashie',        '~> 2.0'
-  spec.add_dependency 'thread',        '~> 0.1'
 
   spec.add_development_dependency 'rspec',              '~> 2.14'
   spec.add_development_dependency 'rspec-mocks',        '~> 2.14'
