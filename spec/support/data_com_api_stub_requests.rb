@@ -24,6 +24,7 @@ class DataComApiStubRequestsBase
       total_hits:           0,
       size_request_only:    false
     }.merge!(options)
+    last_page_records = 0
 
     if options[:include_size_request]
       stub_request(
@@ -72,6 +73,24 @@ class DataComApiStubRequestsBase
           ).to_json
         )
       end
+    elsif options[:total_hits] == 0 && !options[:size_request_only]
+      stub_request(
+        :get,
+        URI.join(
+          DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+        ).to_s
+      ).with(
+        query: hash_including(DataComApi::QueryParameters.new(
+          page_size: options[:page_size],
+          offset:    DataComApi::Client::BASE_OFFSET
+        ).to_hash)
+      ).to_return(
+        body: FactoryGirl.build(
+          :data_com_search_contact_response,
+          page_size: 0,
+          totalHits: options[:total_hits]
+        ).to_json
+      )      
     end
 
     if last_page_records > 0

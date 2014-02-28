@@ -128,8 +128,7 @@ describe DataComApi::Client do
       expect(client.search_contact.page(page_index).size).to be 2
     end
 
-    # [2, 20, 49, 50, 51, 75, 100]
-    [4].each do |total_contacts_count|
+    [0, 2, 4, 10, 11, 15].each do |total_contacts_count|
       describe "#all", focus: true do
         before do
           DataComApiStubRequests.stub_search_contact(
