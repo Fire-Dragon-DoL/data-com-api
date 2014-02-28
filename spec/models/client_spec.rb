@@ -166,6 +166,30 @@ describe DataComApi::Client do
 
         expect(client.search_contact.all.size).to eq max_size
       end
+
+      it "doesn't have more records than max_size when page size is odd" do
+        max_offset        = 10
+        client.page_size  = 3
+        max_size          = max_offset - (max_offset % client.page_size)
+        max_size         += client.page_size
+        client.stub(:max_offset).and_return(max_offset)
+
+        DataComApiStubRequests.stub_search_contact(
+          page_size:  client.page_size,
+          total_hits: 25
+        )
+
+        expect(client.search_contact.all.size).to eq max_size
+      end
+
+      it "doesn't have records when total_hits is 0" do
+        DataComApiStubRequests.stub_search_contact(
+          page_size:  client.page_size,
+          total_hits: 0
+        )
+
+        expect(client.search_contact.all.size).to eq 0
+      end
     end
 
     describe "#each", broken: true do
