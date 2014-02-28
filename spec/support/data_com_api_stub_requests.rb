@@ -9,6 +9,14 @@ class DataComApiStubRequestsBase
   include Singleton
   include WebMock::API
 
+  def stringify_values(hash)
+    hash.each_pair do |key, value|
+      hash[key] = value.to_s
+    end
+
+    hash
+  end
+
   def stub_search_contact(options={})
     options = {
       page_size:            DataComApi::Client::BASE_PAGE_SIZE,
@@ -25,7 +33,7 @@ class DataComApiStubRequestsBase
         ).to_s
       ).with(
         # XXX: Big webmock bug, if query is not a string it doesn't work
-        'query' => hash_including(DataComApi::QueryParameters.new(
+        query: hash_including(DataComApi::QueryParameters.new(
           page_size: DataComApi::Client::SIZE_ONLY_PAGE_SIZE,
           offset:    DataComApi::Client::BASE_OFFSET
         ).to_hash)
@@ -52,7 +60,7 @@ class DataComApiStubRequestsBase
             DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
           ).to_s
         ).with(
-          'query' => hash_including(DataComApi::QueryParameters.new(
+          query: hash_including(DataComApi::QueryParameters.new(
             page_size: options[:page_size],
             offset:    page_index * options[:page_size]
           ).to_hash)
@@ -63,15 +71,6 @@ class DataComApiStubRequestsBase
             totalHits: options[:total_hits]
           ).to_json
         )
-        # puts <<-eos
-        #   query:
-        #     page_size: #{ options[:page_size] }
-        #     offset:    #{ page_index * options[:page_size] }
-
-        #   body:
-        #     page_size: #{ options[:page_size] }
-        #     totalHits: #{ options[:total_hits] }
-        # eos
       end
     end
 
@@ -82,7 +81,7 @@ class DataComApiStubRequestsBase
           DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
         ).to_s
       ).with(
-        'query' => hash_including(DataComApi::QueryParameters.new(
+        query: hash_including(DataComApi::QueryParameters.new(
           page_size: options[:page_size],
           offset:    total_pages * options[:page_size]
         ).to_hash)

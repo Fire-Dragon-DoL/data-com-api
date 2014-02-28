@@ -33,11 +33,6 @@ module DataComApi
 
         request = self.perform_request(page_options)
         calculate_size_from_request! request
-        puts <<-eos
-          offset: #{ offset }     
-          page_size: #{ page_size }
-          #{ request.inspect }
-        eos
 
         self.transform_request request
       end
@@ -52,14 +47,12 @@ module DataComApi
         all_records
       end
 
-      alias_method :to_a, :all
-
       def each_with_index
+        total_records             = 0
         records_per_previous_page = page_size
         current_offset            = 0
 
         loop do
-          binding.pry
           break if current_offset > self.real_max_offset
 
           records = at_offset(current_offset)
@@ -70,12 +63,13 @@ module DataComApi
 
           records_per_previous_page  = records.size
           current_offset            += page_size
+          total_records             += records_per_previous_page
 
-          break unless records_per_previous_page == page_size
+          if records_per_previous_page != page_size || total_records == self.size
+            break
+          end
         end
       end
-
-      alias_method :each, :each_with_index
 
       def real_max_offset
         return @real_max_offset if @real_max_offset
@@ -83,6 +77,9 @@ module DataComApi
         @real_max_offset = client.class::MAX_OFFSET
         @real_max_offset = @real_max_offset - (@real_max_offset % page_size)
       end
+
+      alias_method :to_a, :all
+      alias_method :each, :each_with_index
 
       protected
 

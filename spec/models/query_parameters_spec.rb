@@ -31,4 +31,12 @@ describe DataComApi::QueryParameters do
 
   end
 
+  it "has only string values when converted to_hash" do
+    query_parameters.pageSize = 5
+
+    expect(
+      query_parameters.to_hash['pageSize']
+    ).to eq query_parameters.pageSize.to_s
+  end
+
 end

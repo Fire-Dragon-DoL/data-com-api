@@ -64,7 +64,7 @@ module DataComApi
 
       response = self.class.get(
         ApiURI.company_contact_count(company_id),
-        params
+        { query: params }
       )
       increase_api_calls_count!
 
@@ -76,10 +76,6 @@ module DataComApi
         ApiURI.search_contact,
         generate_params(options)
       )
-      # puts <<-eos
-      #   response: #{ response.inspect }
-      #   options:  #{ generate_params(options) }
-      # eos
       increase_api_calls_count!
 
       response.body
@@ -107,7 +103,7 @@ module DataComApi
       
       response = self.class.get(
         ApiURI.contacts(company_ids),
-        params
+        { query: params }
       )
       increase_api_calls_count!
 
@@ -125,7 +121,7 @@ module DataComApi
       
       response = self.class.get(
         ApiURI.partner_contacts(contact_ids),
-        params
+        { query: params }
       )
       increase_api_calls_count!
 
@@ -137,7 +133,7 @@ module DataComApi
       
       response = self.class.get(
         ApiURI.partner,
-        params
+        { query: params }
       )
       increase_api_calls_count!
 
@@ -153,7 +149,7 @@ module DataComApi
       
       response = self.class.get(
         ApiURI.user,
-        params
+        { query: params }
       )
       increase_api_calls_count!
 
@@ -218,7 +214,7 @@ module DataComApi
         params.page_size = page_size   unless params.pageSize
         params.token     = token
 
-        params
+        { query: params }
       end
 
       def increase_api_calls_count!

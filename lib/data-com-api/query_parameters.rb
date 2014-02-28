@@ -49,5 +49,18 @@ module DataComApi
     property :username
     property :password
     property :token
+
+    # Destructively convert all values using into strings
+    def self.stringify_hash_values(hash)
+      hash.each_pair do |key, value|
+        hash[key] = value.to_s
+      end
+      hash
+    end
+
+    def to_hash
+      self.class.stringify_hash_values(super)
+    end
+
   end
 end
