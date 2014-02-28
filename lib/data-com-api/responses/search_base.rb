@@ -19,10 +19,18 @@ module DataComApi
 
         size_options = options.merge(
           offset:    0,
-          page_size: client.class::SIZE_ONLY_PAGE_SIZE
+          page_size: client.size_only_page_size
         )
         
         calculate_size_from_request! self.perform_request(size_options)
+      end
+
+      def max_size
+        self.real_max_offset + page_size
+      end
+
+      def real_size
+        self.size > self.real_max_offset ? self.max_size : self.size
       end
 
       def at_offset(offset)          
@@ -40,7 +48,7 @@ module DataComApi
       # Be careful, this will load all records in memory, check total_records
       # before doing such a thing
       def all
-        all_records = Array.new(self.size)
+        all_records = Array.new(self.real_size)
 
         self.each_with_index { |record, index| all_records[index] = record }
 
@@ -74,7 +82,7 @@ module DataComApi
       def real_max_offset
         return @real_max_offset if @real_max_offset
 
-        @real_max_offset = client.class::MAX_OFFSET
+        @real_max_offset = client.max_offset
         @real_max_offset = @real_max_offset - (@real_max_offset % page_size)
       end
 

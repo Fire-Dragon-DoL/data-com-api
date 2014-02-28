@@ -128,27 +128,43 @@ describe DataComApi::Client do
       expect(client.search_contact.page(page_index).size).to be 2
     end
 
-    [0, 2, 4, 10, 11, 15].each do |total_contacts_count|
-      describe "#all", focus: true do
-        before do
-          DataComApiStubRequests.stub_search_contact(
-            page_size:  client.page_size,
-            total_hits: total_contacts_count
-          )
-        end
-
-        it "is an array containing only Contact records" do
-          search_contact = client.search_contact
-
-          search_contact.all.each do |contact|
-            expect(contact).to be_an_instance_of DataComApi::Contact
+    describe "#all" do
+      [0, 2, 4, 10, 11, 15].each do |total_contacts_count|
+        context "with #{ total_contacts_count } total_hits" do
+          before do
+            DataComApiStubRequests.stub_search_contact(
+              page_size:  client.page_size,
+              total_hits: total_contacts_count
+            )
           end
-        end
 
-        it "is an array containing all records possible for request" do
-          expect(client.search_contact.all.size).to eq total_contacts_count
-        end
+          it "is an array containing only Contact records" do
+            search_contact = client.search_contact
 
+            search_contact.all.each do |contact|
+              expect(contact).to be_an_instance_of DataComApi::Contact
+            end
+          end
+
+          it "is an array containing all records possible for request" do
+            expect(client.search_contact.all.size).to eq total_contacts_count
+          end
+
+        end
+      end
+
+      it "doesn't have more records than max_size" do
+        max_offset       = 10
+        client.page_size = 2
+        max_size         = max_offset + client.page_size
+        client.stub(:max_offset).and_return(max_offset)
+
+        DataComApiStubRequests.stub_search_contact(
+          page_size:  client.page_size,
+          total_hits: 25
+        )
+
+        expect(client.search_contact.all.size).to eq max_size
       end
     end
 

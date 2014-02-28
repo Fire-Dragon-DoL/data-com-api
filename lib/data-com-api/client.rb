@@ -23,6 +23,14 @@ module DataComApi
     attr_reader :api_calls_count
     attr_reader :token
 
+    def max_offset
+      MAX_OFFSET
+    end
+
+    def size_only_page_size
+      SIZE_ONLY_PAGE_SIZE
+    end
+
     def initialize(api_token=nil)
       @token           = api_token || ENV[ENV_NAME_TOKEN]
       @page_size       = BASE_PAGE_SIZE
