@@ -33,7 +33,7 @@ module DataComApi
         self.size > self.real_max_offset ? self.max_size : self.size
       end
 
-      def at_offset(offset)          
+      def at_offset(offset)
         page_options = options.merge(
           offset:    offset,
           page_size: page_size

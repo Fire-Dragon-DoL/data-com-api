@@ -5,6 +5,7 @@ describe WebMock do
   let!(:dummy_url) { 'http://dummyurl.com' }
 
   before do
+    # Be careful, when stubbing, all values must be strings
     stub_request(
       :get,
       dummy_url

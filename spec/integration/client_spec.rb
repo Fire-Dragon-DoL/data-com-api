@@ -7,23 +7,45 @@ describe DataComApi::Client do
   subject(:client) { FactoryGirl.build(:client) }
 
   describe "#search_contact" do
-    before do
+
+    it "has records when searched with no params" do
       DataComApiStubRequests.stub_search_contact(
-        page_size:  client.page_size,
         total_hits: 10
       )
+
+      expect(client.search_contact.size).to be > 0
     end
 
-    it { expect(client.search_contact.size).to be > 0 }
+    context "when searching by firstname" do
+      before do
+        DataComApiStubRequests.stub_search_few_contacts(
+          total_hits: 1,
+          query: {
+            firstname: 'Dummy'
+          },
+          records: FactoryGirl.build_list(:data_com_contact, 1,
+            firstname: 'Dummy'
+          )
+        )
 
-    xit "with first_name Dummy and returns records" do
-      expect(
-        client.search_contact(first_name: 'Dummy').all.first.first_name
-      ).to eq('Dummy')
-    end
+        DataComApiStubRequests.stub_search_few_contacts(
+          total_hits: 0,
+          query: {
+            firstname: 'DoesntExist'
+          }
+        )
+      end
 
-    xit "with first_name DoesntExist and returns no records" do
-      expect(client.search_contact(first_name: 'DoesntExist').all.first).to be_nil
+      it "with firstname Dummy it has records with Dummy as firstname" do
+        expect(
+          client.search_contact(firstname: 'Dummy').all.first.first_name
+        ).to eq('Dummy')
+      end
+
+      it "with firstname DoesntExist it doesn't find records" do
+        expect(client.search_contact(firstname: 'DoesntExist').all.first).to be_nil
+      end
+
     end
 
   end

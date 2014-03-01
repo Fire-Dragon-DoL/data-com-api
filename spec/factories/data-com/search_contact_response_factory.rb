@@ -7,7 +7,7 @@ FactoryGirl.define do
 
   factory :data_com_search_contact_response, class: Hashie::Mash do
     totalHits 0
-    contacts  []
+    contacts  nil
 
     ignore do
       page_size 3
@@ -16,11 +16,13 @@ FactoryGirl.define do
     initialize_with { new(attributes) }
 
     after(:build) do |data_com_search_contact_response, evaluator|
-      if evaluator.page_size > 0
+      if evaluator.page_size > 0 && data_com_search_contact_response[:contacts].nil?
         data_com_search_contact_response[:contacts] = FactoryGirl.build_list(
           :data_com_contact,
           evaluator.page_size
         )
+      elsif evaluator.page_size == 0 && data_com_search_contact_response[:contacts].nil?
+        data_com_search_contact_response[:contacts] = []
       end
     end
   end

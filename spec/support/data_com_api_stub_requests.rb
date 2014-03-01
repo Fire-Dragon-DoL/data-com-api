@@ -9,12 +9,62 @@ class DataComApiStubRequestsBase
   include Singleton
   include WebMock::API
 
-  def stringify_values(hash)
-    hash.each_pair do |key, value|
-      hash[key] = value.to_s
+  def stub_search_few_contacts(options={})
+    options = {
+      page_size:            DataComApi::Client::BASE_PAGE_SIZE,
+      total_hits:           0,
+      include_size_request: true,
+      size_request_only:    false,
+      query:                {},
+      records:              []
+    }.merge!(options)
+
+    if options[:include_size_request]
+      stub_request(
+        :get,
+        URI.join(
+          DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+        ).to_s
+      ).with(
+        query: hash_including(DataComApi::QueryParameters.new(
+          options[:query].merge(
+            page_size: DataComApi::Client::SIZE_ONLY_PAGE_SIZE,
+            offset:    DataComApi::Client::BASE_OFFSET
+          )
+        ).to_hash)
+      ).to_return(
+        body: FactoryGirl.build(
+          :data_com_search_contact_response,
+          page_size: 0,
+          totalHits: options[:total_hits],
+          contacts:  []
+        ).to_json
+      )
     end
 
-    hash
+    unless options[:size_request_only]
+      stub_request(
+        :get,
+        URI.join(
+          DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+        ).to_s
+      ).with(
+        query: hash_including(DataComApi::QueryParameters.new(
+          options[:query].merge(
+            page_size: options[:page_size],
+            offset:    DataComApi::Client::BASE_OFFSET
+          )
+        ).to_hash)
+      ).to_return(
+        body: FactoryGirl.build(
+          :data_com_search_contact_response,
+          # Used because we want a response with only amount of records requested
+          page_size: options[:records].size,
+          totalHits: options[:total_hits],
+          contacts:  options[:records]
+        ).to_json
+      )
+    end
   end
 
   def stub_search_contact(options={})
@@ -33,7 +83,7 @@ class DataComApiStubRequestsBase
           DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
         ).to_s
       ).with(
-        # XXX: Big webmock bug, if query is not a string it doesn't work
+        # XXX: Big webmock bug, values of hashes in query must be strings
         query: hash_including(DataComApi::QueryParameters.new(
           page_size: DataComApi::Client::SIZE_ONLY_PAGE_SIZE,
           offset:    DataComApi::Client::BASE_OFFSET
