@@ -15,7 +15,6 @@ module DataComApi
         end
 
         def perform_request(received_options)
-          # puts "received_options #{ received_options.inspect }"
           client.search_contact_raw_json(received_options)
         end
       
