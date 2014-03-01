@@ -10,7 +10,7 @@ describe DataComApi::Client do
     before do
       DataComApiStubRequests.stub_search_contact(
         page_size:  client.page_size,
-        total_hits: 500
+        total_hits: 10
       )
     end
 
