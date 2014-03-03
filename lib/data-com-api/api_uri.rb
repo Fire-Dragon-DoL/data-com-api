@@ -6,7 +6,7 @@ module DataComApi
     include Singleton
 
     def company_contact_count(company_id)
-      "/rest/companyContactCount/#{ params.company_id }.json"
+      "/rest/companyContactCount/#{ company_id }.json"
     end
 
     def search_contact

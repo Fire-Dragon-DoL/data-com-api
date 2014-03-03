@@ -50,4 +50,40 @@ describe DataComApi::Client do
 
   end
 
+  describe "#company_contact_count" do
+    before do
+      DataComApiStubRequests.stub_company_contact_count(
+        company_id,
+        total_count: contacts_count
+      )
+    end
+
+    let!(:company_id)     {  1 }
+    let!(:contacts_count) { 10 }
+
+    it { expect(client.company_contact_count(company_id).size).to eq contacts_count }
+    it { expect(client.company_contact_count(company_id).url).not_to be_blank }
+
+    it "has some levels" do
+      expect(client.company_contact_count(company_id).levels).not_to be_empty
+    end
+
+    it "has some departments" do
+      expect(client.company_contact_count(company_id).departments).not_to be_empty
+    end
+
+    it "doesn't have nil levels" do
+      client.company_contact_count(company_id).levels.each do |level|
+        expect(level).not_to be_nil
+      end
+    end
+
+    it "doesn't have nil departments" do
+      client.company_contact_count(company_id).departments.each do |department|
+        expect(department).not_to be_nil
+      end
+    end
+
+  end
+
 end

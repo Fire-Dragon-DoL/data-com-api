@@ -2,7 +2,9 @@ require 'httparty'
 require 'json'
 require 'data-com-api/errors'
 require 'data-com-api/api_uri'
-require 'data-com-api/responses/search_contact.rb'
+require 'data-com-api/responses/search_contact'
+require 'data-com-api/responses/search_company'
+require 'data-com-api/responses/company_contact_count'
 
 module DataComApi
 
@@ -59,6 +61,10 @@ module DataComApi
 
     def search_contact(options={})
       Responses::SearchContact.new(self, options)
+    end
+
+    def company_contact_count(company_id, options={})
+      Responses::CompanyContactCount.new(self, company_id, options)
     end
 
     # Raw calls

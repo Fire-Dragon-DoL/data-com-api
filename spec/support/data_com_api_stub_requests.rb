@@ -9,6 +9,28 @@ class DataComApiStubRequestsBase
   include Singleton
   include WebMock::API
 
+  def stub_company_contact_count(company_id, options={})
+    options = {
+      total_count: 10
+    }.merge!(options)
+
+    stub_request(
+      :get,
+      URI.join(
+        DataComApi::Client.base_uri, DataComApi::ApiURI.company_contact_count(
+          company_id
+        )
+      ).to_s
+    ).with(
+      query: hash_including({})
+    ).to_return(
+      body: FactoryGirl.build(
+        :data_com_company_contact_count_response,
+        totalCount: options[:total_count]
+      ).to_json
+    )
+  end
+
   def stub_search_few_contacts(options={})
     options = {
       page_size:            DataComApi::Client::BASE_PAGE_SIZE,
