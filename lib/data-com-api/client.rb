@@ -5,6 +5,7 @@ require 'data-com-api/api_uri'
 require 'data-com-api/responses/search_contact'
 require 'data-com-api/responses/search_company'
 require 'data-com-api/responses/company_contact_count'
+require 'data-com-api/responses/contacts'
 
 module DataComApi
 
@@ -67,6 +68,16 @@ module DataComApi
       Responses::CompanyContactCount.new(self, company_id, options)
     end
 
+    def contacts(contact_ids, username, password, purchase_flag=false)
+      Responses::Contacts.new(
+        self,
+        contact_ids,
+        username,
+        password,
+        purchase_flag
+      )
+    end
+
     # Raw calls
 
     def company_contact_count_raw(company_id, include_graveyard)
@@ -116,7 +127,7 @@ module DataComApi
       )
       
       response = self.class.get(
-        ApiURI.contacts(company_ids),
+        ApiURI.contacts(contact_ids),
         { query: params }
       )
       increase_api_calls_count!

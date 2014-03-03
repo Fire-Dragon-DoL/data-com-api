@@ -1,6 +1,7 @@
 require 'uri'
 require 'singleton'
 require 'webmock'
+require 'faker'
 require 'data-com-api/api_uri'
 require 'data-com-api/client'
 require 'data-com-api/query_parameters'
@@ -8,6 +9,43 @@ require 'data-com-api/query_parameters'
 class DataComApiStubRequestsBase
   include Singleton
   include WebMock::API
+
+  def stub_contacts(contact_ids, options={})
+    options = {
+      username:           Faker::Internet.user_name,
+      password:           Faker::Internet.password,
+      purchase_flag:      false,
+      total_hits:         1,
+      used_points:        Faker::Number.number(2).to_i,
+      purchased_contacts: 1,
+      point_balance:      Faker::Number.number(2).to_i,
+      contacts:           nil
+    }.merge!(options)
+
+    stub_request(
+      :get,
+      URI.join(
+        DataComApi::Client.base_uri, DataComApi::ApiURI.contacts(
+          contact_ids
+        )
+      ).to_s
+    ).with(
+      query: hash_including(DataComApi::QueryParameters.new(
+        username:      options[:username],
+        password:      options[:password],
+        purchase_flag: options[:purchase_flag]
+      ).to_hash)
+    ).to_return(
+      body: FactoryGirl.build(
+        :data_com_contacts_response,
+        pointsUsed:                options[:used_points],
+        totalHits:                 options[:total_hits],
+        numberOfContactsPurchased: options[:purchased_contacts],
+        pointBalance:              options[:point_balance],
+        contacts:                  options[:contacts]
+      ).to_json
+    )
+  end
 
   def stub_company_contact_count(company_id, options={})
     options = {

@@ -1,6 +1,13 @@
 require 'spec_helper'
+require 'faker'
 require 'data-com-api/responses/search_contact'
+require 'data-com-api/responses/search_company'
+require 'data-com-api/responses/company_contact_count'
+require 'data-com-api/responses/contacts'
 require 'data-com-api/client'
+require 'data-com-api/company_contact_count/department'
+require 'data-com-api/company_contact_count/level'
+require 'data-com-api/contact'
 
 describe DataComApi::Client do
 
@@ -74,13 +81,84 @@ describe DataComApi::Client do
 
     it "doesn't have nil levels" do
       client.company_contact_count(company_id).levels.each do |level|
-        expect(level).not_to be_nil
+        expect(level).to be_an_instance_of DataComApi::CompanyContactCount::Level
       end
     end
 
     it "doesn't have nil departments" do
       client.company_contact_count(company_id).departments.each do |department|
-        expect(department).not_to be_nil
+        expect(department).to be_an_instance_of DataComApi::CompanyContactCount::Department
+      end
+    end
+
+  end
+
+  describe "#contact", focus: true do
+    before do
+      DataComApiStubRequests.stub_contacts(
+        contact_ids,
+        username:           username,
+        password:           password,
+        purchase_flag:      purchase_flag,
+        total_hits:         total_hits,
+        used_points:        used_points,
+        purchased_contacts: purchased_contacts,
+        point_balance:      point_balance
+      )
+    end
+
+    let!(:contact_ids)        { [1, 2]                    }
+    let!(:username)           { Faker::Internet.user_name }
+    let!(:password)           { Faker::Internet.password  }
+    let!(:purchase_flag)      { false                     }
+    let!(:total_hits)         { 1                         }
+    let!(:used_points)        { 2000                      }
+    let!(:purchased_contacts) { 1                         }
+    let!(:point_balance)      { 4818                      }
+
+    it "has used some points" do
+      expect(
+        client.contacts(contact_ids, username, password, purchase_flag).used_points
+      ).to be > 0
+    end
+
+    it "has found some records" do
+      expect(
+        client.contacts(contact_ids, username, password, purchase_flag).size
+      ).to eq total_hits
+    end
+
+    it "has purchased some contacts" do
+      expect(
+        client.contacts(contact_ids, username, password, purchase_flag).purchased_contacts
+      ).to eq purchased_contacts
+    end
+
+    it "reports new point balance" do
+      expect(
+        client.contacts(contact_ids, username, password, purchase_flag).point_balance
+      ).to eq point_balance
+    end
+
+    it "has some contacts" do
+      expect(
+        client.contacts(
+          contact_ids,
+          username,
+          password,
+          purchase_flag
+        ).contacts
+      ).not_to be_empty
+    end
+
+    it "doesn't have nil contacts" do
+      client.contacts(
+        contact_ids,
+        username,
+        password,
+        purchase_flag
+      ).contacts.each do |contact|
+        expect(contact).to be_an_instance_of DataComApi::Contact
       end
     end
 

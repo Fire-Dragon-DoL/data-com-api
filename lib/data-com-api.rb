@@ -10,6 +10,7 @@ require 'data-com-api/responses/search_base'
 require 'data-com-api/responses/search_contact'
 require 'data-com-api/responses/search_company'
 require 'data-com-api/responses/company_contact_count'
+require 'data-com-api/responses/contact'
 require 'data-com-api/client'
 
 module DataComApi
