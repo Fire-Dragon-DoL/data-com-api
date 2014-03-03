@@ -93,7 +93,7 @@ describe DataComApi::Client do
 
   end
 
-  describe "#contact", focus: true do
+  describe "#contact" do
     before do
       DataComApiStubRequests.stub_contacts(
         contact_ids,
