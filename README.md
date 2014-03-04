@@ -1,7 +1,6 @@
 # DataComApi
 
-Allows to interface with Data.com API ( Salesforce, ex Jigsaw ).  
-**Work in progress**
+Ruby bindings for Data.com API ( Salesforce, ex Jigsaw ).
 
 ## Installation
 
