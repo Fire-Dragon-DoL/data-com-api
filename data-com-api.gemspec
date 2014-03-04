@@ -9,10 +9,10 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Fire-Dragon-DoL"]
   spec.email         = ["francesco.belladonna@gmail.com"]
   spec.description   = <<-eos
-    Allows to interface with Data.com API ( Salesforce, ex Jigsaw )
+    Ruby bindings for Data.com API ( Salesforce, ex Jigsaw )
   eos
   spec.summary       = <<-eos
-    Allows to interface with Data.com API ( Salesforce, ex Jigsaw )
+    Ruby bindings for Data.com API ( Salesforce, ex Jigsaw )
   eos
   spec.homepage      = "https://github.com/Fire-Dragon-DoL/data-com-api"
   spec.license       = "MIT"
