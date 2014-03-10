@@ -64,6 +64,10 @@ module DataComApi
       Responses::SearchContact.new(self, options)
     end
 
+    def search_company(options={})
+      Responses::SearchCompany.new(self, options)
+    end
+
     def company_contact_count(company_id, options={})
       Responses::CompanyContactCount.new(self, company_id, options)
     end

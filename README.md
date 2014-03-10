@@ -6,7 +6,7 @@ Ruby bindings for Data.com API ( Salesforce, ex Jigsaw ).
 
 Add this line to your application's Gemfile:
 
-    gem 'data-com-api', '~> 0.1.2'
+    gem 'data-com-api', '~> 0.1.3'
 
 And then execute:
 
