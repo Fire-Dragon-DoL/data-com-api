@@ -1,5 +1,3 @@
-require 'active_support/cache'
-
 module DataComApi
   module Responses
     class Base

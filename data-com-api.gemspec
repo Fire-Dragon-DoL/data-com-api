@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'httparty',      '~> 0.12'
-  spec.add_dependency 'activesupport', '~> 4.0'
+  spec.add_dependency 'activesupport', '>= 3.2.0'
   spec.add_dependency 'hashie',        '~> 2.0'
 
   spec.add_development_dependency 'rspec',              '~> 2.14'
