@@ -6,6 +6,14 @@ module DataComApi
   module Responses
     class SearchCompany < SearchBase
 
+      MAX_PAGE_SIZE = 100
+
+      def initialize(api_client, received_options)
+        super
+
+        @page_size = MAX_PAGE_SIZE if @page_size > MAX_PAGE_SIZE
+      end
+
       protected
 
         def transform_request(request)

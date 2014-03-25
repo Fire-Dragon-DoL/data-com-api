@@ -20,7 +20,7 @@ module DataComApi
     SIZE_ONLY_PAGE_SIZE = 0
     # We start at 1, 0 is a special case
     MIN_PAGE_SIZE       = 1
-    MAX_PAGE_SIZE       = 100
+    MAX_PAGE_SIZE       = 500
     MAX_OFFSET          = 100_000
 
     attr_reader :api_calls_count

@@ -36,12 +36,12 @@ describe DataComApi::Client do
 
   describe "#page_size=" do
 
-    it "accepts values between 1 and 100" do
-      expect{client.page_size = Random.rand(100) + 1}.not_to raise_error
+    it "accepts values between 1 and 500" do
+      expect{client.page_size = Random.rand(500) + 1}.not_to raise_error
     end
 
-    it "doesn't accept values > 100" do
-      expect{client.page_size = 101}.to raise_error DataComApi::ParamError
+    it "doesn't accept values > 500" do
+      expect{client.page_size = 501}.to raise_error DataComApi::ParamError
     end
 
     it "doesn't accept values < 1" do

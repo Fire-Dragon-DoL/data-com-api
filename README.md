@@ -27,7 +27,9 @@ client = DataComApi::Client.new('your-api-token')
 You can then configure the client in the following way:
 
 ```ruby
-client.page_size = 100 # Value must be between 1 and 100
+# Value must be between 1 and 500, 100 will be used if search_company is used
+# and supplied value is greater than 100
+client.page_size = 100
 ```
 
 You can also get the totals API calls performed on the client with:
