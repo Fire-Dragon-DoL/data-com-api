@@ -6,7 +6,7 @@ Ruby bindings for Data.com API ( Salesforce, ex Jigsaw ).
 
 Add this line to your application's Gemfile:
 
-    gem 'data-com-api', '~> 0.1.3'
+    gem 'data-com-api', '~> 0.2.0'
 
 And then execute:
 
@@ -54,6 +54,9 @@ requesting `size`, `all`, `each` and such (keep reading).
 
 The parameters accepted by this method are the keys of the [DataComApi::QueryParameters](https://github.com/Fire-Dragon-DoL/data-com-api/blob/master/lib/data-com-api/query_parameters.rb). Notice that you can use the key specified as `:from` for a more ruby-like
 syntax.
+
+**start_at_offset** and **end_at_offset**: This two new parameters allow your response to start fetching data at specified offset or end earlier (if
+`end_at_offset` is bigger than max fetchable records, it will be ignored and code will handle things in standard way).
 
 The returned object is a `DataComApi::SearchContact` which is mostly a [DataComApi::SearchBase](https://github.com/Fire-Dragon-DoL/data-com-api/blob/master/lib/data-com-api/responses/search_base.rb) instance with the following main methods:
 - `size` which returns the `totalHits` field from the response

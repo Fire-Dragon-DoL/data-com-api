@@ -159,6 +159,68 @@ describe DataComApi::Client do
 
     end
 
+    context "when starting at different offset" do
+
+      describe "#each" do
+        before do
+          DataComApiStubRequests.stub_search_contact(
+            page_size:  client.page_size,
+            total_hits: total_contacts_count
+          )
+          stub_request(
+            :get,
+            URI.join(
+              DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+            ).to_s
+          ).with(
+            query: hash_including({
+              'offset'   => '10',
+              'pageSize' => client.page_size.to_s
+            })
+          ).to_return(
+            body: FactoryGirl.build(
+              :data_com_search_contact_response,
+              page_size: client.page_size,
+              totalHits: total_contacts_count
+            ).to_json
+          )
+        end
+
+        let!(:total_contacts_count) { 10 }
+
+        it "is an array containing all records possible for request" do
+          start_at_offset = 2
+          response        = client.search_contact(start_at_offset: start_at_offset)
+          contacts_count  = 0
+
+          response.each { contacts_count += 1 }
+          expect(contacts_count).to eq(total_contacts_count - start_at_offset)
+        end
+
+        context "when ending at different offset" do
+
+          it "is an array containing all records possible for request" do
+            start_at_offset = 2
+            # XXX: BE EXTREMELY CAREFUL, use an odd number (0 counting as 1 record)
+            # otherwise test will fail because of the way I mocked web requests
+            # which are returning always 2 records, even if less are returned
+            end_at_offset   = 7
+            contacts_count  = 0
+            response        = client.search_contact(
+              start_at_offset: start_at_offset,
+              end_at_offset:   end_at_offset
+            )
+
+            response.each { contacts_count += 1 }
+            expect(contacts_count).to eq((end_at_offset + 1) - start_at_offset)
+          end
+
+        end
+
+      end
+
+    end
+
   end
 
 end

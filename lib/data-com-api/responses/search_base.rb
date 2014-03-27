@@ -5,9 +5,22 @@ module DataComApi
     # Abstract class
     class SearchBase < Base
 
+      OFFSET_KEYS = [:start_at_offset, :end_at_offset].freeze
       
+      # Options accept 2 special params: :start_at_offset and :end_at_offset
+      # which is where the records will be start being fetched from
       def initialize(api_client, received_options)
-        @options = received_options
+        @start_at_offset = 0
+        @end_at_offset   = nil
+
+        unless received_options[OFFSET_KEYS[0]].nil?
+          @start_at_offset = received_options[OFFSET_KEYS[0]].to_i
+        end
+        unless received_options[OFFSET_KEYS[1]].nil?
+          @end_at_offset = received_options[OFFSET_KEYS[1]].to_i
+        end
+
+        @options = received_options.reject { |key| OFFSET_KEYS.include? key.to_sym }
         super(api_client)
 
         # Cache pagesize, MUST NOT change between requests
@@ -56,9 +69,9 @@ module DataComApi
       end
 
       def each_with_index
-        total_records             = 0
         records_per_previous_page = page_size
-        current_offset            = 0
+        current_offset            = @start_at_offset
+        total_records             = current_offset
 
         loop do
           break if current_offset > self.real_max_offset
@@ -84,6 +97,11 @@ module DataComApi
 
         @real_max_offset = client.max_offset
         @real_max_offset = @real_max_offset - (@real_max_offset % page_size)
+        unless @end_at_offset.nil? || @real_max_offset < @end_at_offset
+          @real_max_offset = @end_at_offset
+        end
+
+        @real_max_offset
       end
 
       alias_method :to_a, :all
