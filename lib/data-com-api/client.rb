@@ -227,7 +227,12 @@ module DataComApi
     private
 
       def json_or_raise(json_str)
-        json = JSON.parse(json_str)
+        begin
+          json = JSON.parse(json_str)
+        rescue => json_parsing_error
+          puts "Current error: #{ json_parsing_error }\nJSON: #{ json_str }"
+          raise
+        end
 
         if json.kind_of? Array
           error = json.first
