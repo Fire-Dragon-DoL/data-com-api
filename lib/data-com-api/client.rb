@@ -227,11 +227,12 @@ module DataComApi
     private
 
       def json_or_raise(json_str)
-        begin
+        json = nil
+        
+        if json_str == DataComApi::Error::API_LIMIT_EXCEEDED_MSG
+          raise ApiLimitExceededError, json_str
+        else
           json = JSON.parse(json_str)
-        rescue => json_parsing_error
-          puts "Current error: #{ json_parsing_error }\nJSON: #{ json_str }"
-          raise
         end
 
         if json.kind_of? Array

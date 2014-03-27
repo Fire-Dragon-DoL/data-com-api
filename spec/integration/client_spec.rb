@@ -8,12 +8,28 @@ require 'data-com-api/client'
 require 'data-com-api/company_contact_count/department'
 require 'data-com-api/company_contact_count/level'
 require 'data-com-api/contact'
+require 'data-com-api/errors'
 
 describe DataComApi::Client do
 
   subject(:client) { FactoryGirl.build(:client) }
 
   describe "#search_contact" do
+
+    it "raises ApiLimitExceededError when API limit exceeded text is returned" do
+      stub_request(
+        :get,
+        URI.join(
+          DataComApi::Client.base_uri, DataComApi::ApiURI.search_contact
+        ).to_s
+      ).with(query: hash_including({})).to_return(
+        body: DataComApi::Error::API_LIMIT_EXCEEDED_MSG
+      )
+
+      expect{
+        client.search_contact.size
+      }.to raise_error DataComApi::ApiLimitExceededError
+    end
 
     it "has records when searched with no params" do
       DataComApiStubRequests.stub_search_contact(

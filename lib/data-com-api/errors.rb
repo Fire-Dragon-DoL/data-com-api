@@ -4,8 +4,9 @@ module DataComApi
 
   class Error < StandardError
 
-    API_HTTP_STATUS_CODE = 0
-    API_ERROR_CODE       = 'no error code provided'
+    API_HTTP_STATUS_CODE   = 0
+    API_ERROR_CODE         = 'no error code provided'.freeze
+    API_LIMIT_EXCEEDED_MSG = 'API plan limit exceeded'.freeze
 
     attr_reader :http_status_code
     attr_reader :api_stack_trace
@@ -91,6 +92,15 @@ module DataComApi
   class NotAvailableError < Error
     API_HTTP_STATUS_CODE = 503
     API_ERROR_CODE       = 'NOT_AVAILABLE'.freeze
+  end
+
+  class ApiLimitExceededError < Error
+    # This info are not true, there is no error code nor status code, but
+    # I added those to keep consistency.
+    # The limit exceeded error is returned as "API plan limit exceeded" plain
+    # string
+    API_HTTP_STATUS_CODE = 404
+    API_ERROR_CODE       = 'API_LIMIT_EXCEEDED'.freeze
   end
 
 end
