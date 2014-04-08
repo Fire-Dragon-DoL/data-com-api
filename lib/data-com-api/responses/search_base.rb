@@ -92,10 +92,14 @@ module DataComApi
         end
       end
 
+      def max_offset
+        client.max_offset
+      end
+
       def real_max_offset
         return @real_max_offset if @real_max_offset
 
-        @real_max_offset = client.max_offset
+        @real_max_offset = self.max_offset
         @real_max_offset = @real_max_offset - (@real_max_offset % page_size)
         unless @end_at_offset.nil? || @real_max_offset < @end_at_offset
           @real_max_offset = @end_at_offset

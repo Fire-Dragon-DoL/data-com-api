@@ -6,7 +6,7 @@ Ruby bindings for Data.com API ( Salesforce, ex Jigsaw ).
 
 Add this line to your application's Gemfile:
 
-    gem 'data-com-api', '~> 0.2.0'
+    gem 'data-com-api', '~> 0.2.1'
 
 And then execute:
 
@@ -93,6 +93,9 @@ This response has the following methods:
 - `point_balance` which returns `pointBalance` from API response
 - `contacts` which returns an array of [DataComApi::Contact](https://github.com/Fire-Dragon-DoL/data-com-api/blob/master/lib/data-com-api/contact.rb)
 
+## Changelog
+- Updated code to support variable `max_offset` if required in future
+
 ## TODO
 
 - Implement `partner` request
@@ -102,6 +105,8 @@ This response has the following methods:
   `search_contact`
 - Improve tests organization
 - Test exceptions when performing API requests
+- Support for "Multiple values" as stated in the api, instead of strings
+  separated with commas
 
 ## Contributing
 
